@@ -1,0 +1,5 @@
+# Import from base.txt
+-r base.txt
+
+boto==2.48.0
+django-storages==1.6.6
