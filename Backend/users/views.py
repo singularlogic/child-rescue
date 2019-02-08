@@ -86,6 +86,38 @@ class UserCreate(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+# class EndUserCreate(generics.CreateAPIView):
+#     serializer_class = UserSerializer
+#     permission_classes = (permissions.IsAuthenticated,)
+#
+#     def create(self, request, *args, **kwargs):
+#
+#         has_role_attached = 'role' in request.data and request.data['role'] is not None and len(request.data['role']) > 0
+#         has_organization_attached = 'organization' in request.data and request.data['organization'] is not None and len(request.data['organization']) > 0
+#
+#         def verify_email():
+#             if 'email' in request.data:
+#                 email = request.data['email'].lower()
+#                 email_count = User.objects.filter(email=email).count()
+#                 if email_count != 0:
+#                     return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
+#             else:
+#                 return Response(['Email is required'], status=status.HTTP_403_FORBIDDEN)
+#
+#         if has_role_attached:
+#             return Response(['End users cannot have any role attached'], status=status.HTTP_403_FORBIDDEN)
+#
+#         if has_organization_attached:
+#             return Response(['End users cannot belong to any organization'], status=status.HTTP_403_FORBIDDEN)
+#
+#         verify_email()
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)

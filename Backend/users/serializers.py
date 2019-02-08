@@ -39,6 +39,28 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'organization', 'role', 'password', 'first_name', 'last_name', 'profile_image', 'is_end_user')
 
 
+# class EndUserSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True)
+#
+#     def create(self, validated_data):
+#         user = User.objects.create(
+#             organization=None,
+#             role=None,
+#             email=validated_data['email'].lower(),
+#             first_name=validated_data['first_name'],
+#             last_name=validated_data['last_name'],
+#             is_end_user=validated_data['is_end_user'],
+#             is_active=True
+#         )
+#         user.set_password(validated_data['password'])
+#         user.save()
+#         return user
+#
+#     class Meta:
+#         model = User
+#         fields = ('id', 'email', 'organization', 'role', 'password', 'first_name', 'last_name', 'profile_image', 'is_end_user')
+
+
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=100)
 

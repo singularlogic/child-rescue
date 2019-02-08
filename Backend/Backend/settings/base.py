@@ -36,7 +36,6 @@ BASE_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
-    'django.contrib.gis',
 ]
 
 THIRD_PARTY_APPS = [
@@ -203,7 +202,7 @@ FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        'ENGINE': 'django.db.backends.postgresql',
         "NAME": os.getenv('POSTGRES_DATABASE_NAME'),
         "USER": os.getenv('POSTGRES_DATABASE_USER'),
         "PASSWORD": os.getenv('POSTGRES_DATABASE_PASSWORD'),
