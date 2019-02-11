@@ -24,6 +24,7 @@ urlpatterns = [
     path('auth/', include('rest_framework_social_oauth2.urls')),
     path('api/v1/users/', include('users.urls', namespace='v1')),
     path('api/v1/organizations/', include('organizations.urls', namespace='v1')),
+    path('api/v1/cases/', include('cases.urls', namespace='v1')),
 ]
 
 

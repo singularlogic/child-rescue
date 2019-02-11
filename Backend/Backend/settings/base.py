@@ -50,6 +50,7 @@ PRODUCT_APPS = [
     'users.apps.UsersConfig',
     'firebase.apps.FirebaseConfig',
     'organizations.apps.OrganizationsConfig',
+    'cases.apps.CasesConfig',
 ]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + PRODUCT_APPS
