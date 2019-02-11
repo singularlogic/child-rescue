@@ -2,12 +2,14 @@ from django.urls import path
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from .views import UserCreate, UserDetail, UserLogin, UserLogout, ForgotPassword, PasswordReset, UuidActivityCreate
+from .views import UserCreate, UserDetail, UserLogin, UserLogout, ForgotPassword, PasswordReset, UuidActivityCreate, \
+    EndUserCreate
 
 app_name = 'users'
 
 urlpatterns = [
-    path('register/', UserCreate.as_view(), name='register'),
+    path('register-admin/', UserCreate.as_view(), name='register'),
+    path('register/', EndUserCreate.as_view(), name='register'),
     path('login/', UserLogin.as_view(), name='login'),
     path('logout/', UserLogout.as_view(), name='logout'),
     path('me/', UserDetail.as_view(), name='me'),
