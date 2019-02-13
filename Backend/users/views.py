@@ -46,38 +46,32 @@ class UserCreate(generics.CreateAPIView):
             elif request.user.role == 'facility_manager':
                 return False
 
-        def verify_email():
-            if 'email' in request.data:
-                email = request.data['email'].lower()
-                email_count = User.objects.filter(email=email).count()
-                if email_count != 0:
-                    return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
-            else:
-                return Response(['Email is required'], status=status.HTTP_403_FORBIDDEN)
+        if 'email' in request.data:
+            email = request.data['email'].lower()
+            email_count = User.objects.filter(email=email).count()
+            if email_count != 0:
+                return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(['Email is required'], status=status.HTTP_403_FORBIDDEN)
 
-        def verify_organization():
-            if request.user.role != 'admin':
-                if has_role_attached and not has_organization_attached:
-                    return Response('You should provide a valid organization for user', status=status.HTTP_403_FORBIDDEN)
-            else:
-                if has_organization_attached:
-                    return Response('Admin does not belong to any organization', status=status.HTTP_403_FORBIDDEN)
+        if has_organization_attached and not has_role_attached:
+            return Response('You should provide a valid role for user', status=status.HTTP_403_FORBIDDEN)
 
-        def verify_role():
-            if has_organization_attached and not has_role_attached:
-                return Response('You should provide a valid role for user', status=status.HTTP_403_FORBIDDEN)
+        if has_role_attached:
+            if not _has_role_permissions(request.data['role']):
+                return Response('({}) user has not permission to create {}'.format(
+                    request.user.role or 'Simple',
+                    request.data['role'].title()
+                ),
+                    status=status.HTTP_403_FORBIDDEN)
 
-            if has_role_attached:
-                if not _has_role_permissions(request.data['role']):
-                    return Response('({}) user has not permission to create {}'.format(
-                        request.user.role or 'Simple',
-                        request.data['role'].title()
-                    ),
-                        status=status.HTTP_403_FORBIDDEN)
+        if request.user.role != 'admin':
+            if has_role_attached and not has_organization_attached:
+                return Response('You should provide a valid organization for user', status=status.HTTP_403_FORBIDDEN)
+        else:
+            if has_organization_attached:
+                return Response('Admin does not belong to any organization', status=status.HTTP_403_FORBIDDEN)
 
-        verify_email()
-        verify_role()
-        verify_organization()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
