@@ -16,6 +16,7 @@ from .serializers import UserSerializer, EndUserSerializer, ForgotPasswordSerial
 from .models import User, UuidActivity, Uuid
 from .utils import save_profile_image
 from .uuid_management import UuidManagement
+from .helper import Helper
 
 
 class UserCreate(generics.CreateAPIView):
@@ -23,54 +24,32 @@ class UserCreate(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
-        has_role_attached = 'role' in request.data and request.data['role'] is not None and len(request.data['role']) > 0
-        has_organization_attached = 'organization' in request.data and request.data['organization'] is not None and len(request.data['organization']) > 0
-
-        def _has_role_permissions(role):
-            if request.user.role == 'admin':
-                return True
-            elif request.user.role == 'owner':
-                if role not in ['admin', 'owner']:
-                    return True
-                else:
-                    return False
-            elif request.user.role == 'coordinator':
-                if role not in ['admin', 'owner', 'coordinator']:
-                    return True
-                else:
-                    return False
-            elif request.user.role == 'case_manager':
-                return False
-            elif request.user.role == 'network_manager':
-                return False
-            elif request.user.role == 'facility_manager':
-                return False
+        has_role_attached = 'role' in request.data \
+                            and request.data['role'] is not None \
+                            and len(request.data['role']) > 0
+        has_organization_attached = 'organization' in request.data \
+                                    and request.data['organization'] is not None \
+                                    and len(request.data['organization']) > 0
 
         if 'email' in request.data:
-            email = request.data['email'].lower()
-            email_count = User.objects.filter(email=email).count()
-            if email_count != 0:
+            if Helper.email_exists(request.data['email']):
                 return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
         else:
             return Response(['Email is required'], status=status.HTTP_403_FORBIDDEN)
 
-        if has_organization_attached and not has_role_attached:
-            return Response('You should provide a valid role for user', status=status.HTTP_403_FORBIDDEN)
-
         if has_role_attached:
-            if not _has_role_permissions(request.data['role']):
-                return Response('({}) user has not permission to create {}'.format(
+            if request.user.role != 'admin' and not has_organization_attached:
+                return Response('You should provide a valid organization for user', status=status.HTTP_403_FORBIDDEN)
+
+            if not Helper.has_role_permissions(request.user.role, request.data['role']):
+                return Response('{} user has no permission to create {}'.format(
                     request.user.role or 'Simple',
                     request.data['role'].title()
                 ),
                     status=status.HTTP_403_FORBIDDEN)
-
-        if request.user.role != 'admin':
-            if has_role_attached and not has_organization_attached:
-                return Response('You should provide a valid organization for user', status=status.HTTP_403_FORBIDDEN)
         else:
             if has_organization_attached:
-                return Response('Admin does not belong to any organization', status=status.HTTP_403_FORBIDDEN)
+                return Response('You should provide a valid role for user', status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -84,25 +63,24 @@ class EndUserCreate(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
 
-        has_role_attached = 'role' in request.data and request.data['role'] is not None and len(request.data['role']) > 0
-        has_organization_attached = 'organization' in request.data and request.data['organization'] is not None and len(request.data['organization']) > 0
+        has_role_attached = 'role' in request.data \
+                            and request.data['role'] is not None \
+                            and len(request.data['role']) > 0
+        has_organization_attached = 'organization' in request.data \
+                                    and request.data['organization'] is not None \
+                                    and len(request.data['organization']) > 0
 
-        def verify_email():
-            if 'email' in request.data:
-                email = request.data['email'].lower()
-                email_count = User.objects.filter(email=email).count()
-                if email_count != 0:
-                    return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
-            else:
-                return Response(['Email is required'], status=status.HTTP_403_FORBIDDEN)
+        if 'email' in request.data:
+            if Helper.email_exists(request.data['email']):
+                return Response(['Email already exists'], status=status.HTTP_403_FORBIDDEN)
 
+        # Optional checks?
         if has_role_attached:
             return Response(['End users cannot have any role attached'], status=status.HTTP_403_FORBIDDEN)
 
         if has_organization_attached:
             return Response(['End users cannot belong to any organization'], status=status.HTTP_403_FORBIDDEN)
 
-        verify_email()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
