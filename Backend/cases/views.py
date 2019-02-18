@@ -28,9 +28,16 @@ class ProfileList(generics.ListCreateAPIView):
     serializer_class = ProfileSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-    def perform_create(self, serializer):
-        case_id = self.request.data['case_id']
-        serializer.save(case_id=case_id)
+    # def perform_create(self, serializer):
+    #     case_id = self.request.data['case_id']
+    #     serializer.save(case_id=case_id)
+
+    def create(self, validated_data):
+        profiles = validated_data.pop('profiles')
+        case = Case.objects.create(**validated_data)
+        for profile in profiles:
+            Profile.objects.create(case=case, **profile)
+        return case
 
 
 class ProfileDetails(generics.RetrieveUpdateDestroyAPIView):
