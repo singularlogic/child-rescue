@@ -9,6 +9,7 @@ class Case(models.Model):
     child = models.ForeignKey(Child, on_delete=models.PROTECT)
     is_active = models.BooleanField(default=False)
 
+
     # area_of_disappearance = models.CharField(max_length=1024, blank=True, null=True)
     # latitude_of_disappearance = models.FloatField(blank=True, null=True)
     # longitude_of_disappearance = models.FloatField(blank=True, null=True)
@@ -50,7 +51,7 @@ class Case(models.Model):
 
 
 class Demographics(models.Model):
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name='demographics')
+    case = models.OneToOneField(Case, on_delete=models.PROTECT, related_name='demographics')
     home_address = models.CharField(max_length=250, blank=True, null=True)
     # home_country = models.CharField(max_length=250, blank=True, null=True)
     # home_postal_code = models.CharField(max_length=10, blank=True, null=True)
@@ -80,13 +81,13 @@ class Demographics(models.Model):
 
 
 class Medical(models.Model):
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name='medicals')
-    health_issues = models.CharField(max_length=2048)
+    case = models.OneToOneField(Case, on_delete=models.PROTECT, related_name='medicals')
+    health_issues = models.CharField(max_length=2048, blank=True, null=True)
     medical_treatment_required = models.BooleanField(default=False)
 
 
 class Social(models.Model):
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name='socials')
+    case = models.OneToOneField(Case, on_delete=models.PROTECT, related_name='socials')
     social_media = models.CharField(max_length=2048, blank=True, null=True)
     # CONCERN_CHOICES = (
     #     ('child_headed_household', 'Child headed household'),
@@ -125,9 +126,9 @@ class Social(models.Model):
 
 
 class Physical(models.Model):
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name='physicals')
-    height = models.CharField(max_length=50)
-    weight = models.CharField(max_length=50)
+    case = models.OneToOneField(Case, on_delete=models.PROTECT, related_name='physicals')
+    height = models.CharField(max_length=50, blank=True, null=True)
+    weight = models.CharField(max_length=50, blank=True, null=True)
     # eye_color = models.CharField(max_length=50)
     # hair_color = models.CharField(max_length=50)
     # skin_color = models.CharField(max_length=50)
@@ -147,9 +148,9 @@ class Physical(models.Model):
 
 
 class Profile(models.Model):
-    case = models.ForeignKey(Case, on_delete=models.PROTECT, related_name='profiles')
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    case = models.OneToOneField(Case, on_delete=models.PROTECT, related_name='profiles')
+    first_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50, blank=True, null=True)
     # mother_name = models.CharField(max_length=50)
     # father_name = models.CharField(max_length=50)
     # phone = models.CharField(max_length=15)

@@ -22,6 +22,15 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CaseSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance.profile)
+        self.perform_destroy(instance)
+        self.perform_destroy(instance)
+        self.perform_destroy(instance)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ProfileList(generics.ListCreateAPIView):
     queryset = Profile.objects.all()

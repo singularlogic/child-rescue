@@ -58,11 +58,11 @@ class DemographicsSerializer(serializers.ModelSerializer):
 
 
 class CaseSerializer(serializers.ModelSerializer):
-    profiles = ProfileSerializer(many=True)
-    physicals = PhysicalSerializer(many=True)
-    socials = SocialSerializer(many=True)
-    medicals = MedicalSerializer(many=True)
-    demographics = DemographicsSerializer(many=True)
+    profiles = ProfileSerializer(many=False)
+    physicals = PhysicalSerializer(many=False)
+    socials = SocialSerializer(many=False)
+    medicals = MedicalSerializer(many=False)
+    demographics = DemographicsSerializer(many=False)
 
     class Meta:
         model = Case
@@ -77,44 +77,14 @@ class CaseSerializer(serializers.ModelSerializer):
         demographics = validated_data.pop('demographics')
         case = Case.objects.create(**validated_data)
 
-        for physical in physicals:
-            Physical.objects.create(case=case, **physical)
-
-        for profile in profiles:
-            Profile.objects.create(case=case, **profile)
-
-        for social in socials:
-            Social.objects.create(case=case, **social)
-
-        for medical in medicals:
-            Medical.objects.create(case=case, **medical)
-
-        for demographic in demographics:
-            Demographics.objects.create(case=case, **demographic)
+        Physical.objects.create(case=case, **physicals)
+        Profile.objects.create(case=case, **profiles)
+        Social.objects.create(case=case, **socials)
+        Medical.objects.create(case=case, **medicals)
+        Demographics.objects.create(case=case, **demographics)
 
         return case
 
-    def update(self, instance, validated_data):
-        profiles = validated_data.pop('profiles')
-        physicals = validated_data.pop('physicals')
-        socials = validated_data.pop('socials')
-        medicals = validated_data.pop('medicals')
-        demographics = validated_data.pop('demographics')
-        case = Case.objects.create(**validated_data)
 
-        for physical in physicals:
-            Physical.objects.update(case=case, **physical)
 
-        for profile in profiles:
-            Profile.objects.create(case=case, **profile)
 
-        for social in socials:
-            Social.objects.create(case=case, **social)
-
-        for medical in medicals:
-            Medical.objects.create(case=case, **medical)
-
-        for demographic in demographics:
-            Demographics.objects.create(case=case, **demographic)
-
-        return case
