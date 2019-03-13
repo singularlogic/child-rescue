@@ -47,10 +47,21 @@ THIRD_PARTY_APPS = [
 ]
 
 PRODUCT_APPS = [
-    'users.apps.UsersConfig',
-    'firebase.apps.FirebaseConfig',
-    'organizations.apps.OrganizationsConfig',
-    'cases.apps.CasesConfig',
+    'core.users.apps.UsersConfig',
+    'core.organizations.apps.OrganizationsConfig',
+    'core.cases.apps.CasesConfig',
+    'core.evidences.apps.EvidencesConfig',
+    'core.firebase.apps.FirebaseConfig',
+
+    'web_admin_app.web_admin_app_users.apps.WebAdminAppUsersConfig',
+    'web_admin_app.web_admin_app_organizations.apps.WebAdminAppOrganizationsConfig',
+    'web_admin_app.web_admin_app_cases.apps.WebAdminAppCasesConfig',
+    'web_admin_app.web_admin_app_evidences.apps.WebAdminAppEvidencesConfig',
+
+    'mobile_app.mobile_app_users.apps.MobileAppUsersConfig',
+    'mobile_app.mobile_app_cases.apps.MobileAppCasesConfig',
+    'mobile_app.mobile_app_evidences.apps.MobileAppEvidencesConfig',
+    'mobile_app.mobile_app_firebase.apps.MobileAppFirebaseConfig',
 ]
 
 INSTALLED_APPS = BASE_APPS + THIRD_PARTY_APPS + PRODUCT_APPS

@@ -22,9 +22,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('auth/', include('rest_framework_social_oauth2.urls')),
-    path('api/v1/users/', include('users.urls', namespace='v1')),
-    path('api/v1/organizations/', include('organizations.urls', namespace='v1')),
-    path('api/v1/cases/', include('cases.urls', namespace='v1')),
+
+    path('web_admin/api/v1/users/', include('web_admin_app.web_admin_app_users.urls', namespace='web_admin_users_v1')),
+    path('web_admin/api/v1/organizations/', include('web_admin_app.web_admin_app_organizations.urls', namespace='web_admin_organizations_v1')),
+    path('web_admin/api/v1/cases/', include('web_admin_app.web_admin_app_cases.urls', namespace='web_admin_cases_v1')),
+
+    path('mobile/api/v1/users/', include('mobile_app.mobile_app_users.urls', namespace='mobile_users_v1')),
+    path('mobile/api/v1/cases/', include('mobile_app.mobile_app_cases.urls', namespace='mobile_cases_v1')),
+    path('mobile/api/v1/evidences/', include('mobile_app.mobile_app_evidences.urls', namespace='mobile_evidences_v1')),
 ]
 
 
