@@ -8,7 +8,6 @@ from core.users.models import User
 
 class Evidence(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
@@ -21,7 +20,7 @@ class Evidence(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Evidence from user {user} for case {case}".format(user=self.user, case=self.case)
+        return "Evidence for case {case}".format(case=self.case)
 
     def evidence_image_element(self):
         return mark_safe('<img src="http://localhost:8000/media/%s" width="32" height="32" />' % self.evidence_image)

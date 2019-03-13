@@ -1,4 +1,4 @@
-from core.cases.models import DemographicData, MedicalData, SocialData, PhysicalData, ProfileData
+from core.cases.models import DemographicData, MedicalData, PsychologicalData, PhysicalData, PersonalData, SocialMediaData
 
 
 class CaseUtils(object):
@@ -12,13 +12,17 @@ class CaseUtils(object):
         return MedicalData.objects.get(child=child_id, case=case_id)
 
     @staticmethod
-    def get_social_data(child_id, case_id):
-        return SocialData.objects.get(child=child_id, case=case_id)
+    def get_psychological_data(child_id, case_id):
+        return PsychologicalData.objects.get(child=child_id, case=case_id)
 
     @staticmethod
     def get_physical_data(child_id, case_id):
         return PhysicalData.objects.get(child=child_id, case=case_id)
 
     @staticmethod
-    def get_profile_data(child_id, case_id):
-        return ProfileData.objects.get(child=child_id, case=case_id)
+    def get_personal_data(child_id, case_id):
+        return PersonalData.objects.get(child=child_id, case=case_id)
+
+    @staticmethod
+    def get_social_media_data(child_id, case_id):
+        return SocialMediaData.objects.get(child=child_id, case=case_id)

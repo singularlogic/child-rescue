@@ -7,9 +7,16 @@ from .serializers import CaseSerializer
 
 
 class CaseList(generics.ListCreateAPIView):
-    queryset = Case.objects.all()
     serializer_class = CaseSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        child_id = self.request.query_params.get('child_id', None)
+        if child_id is not None:
+            queryset = Case.objects.filter(child_id=child_id)
+        else:
+            queryset = Case.objects.all()
+        return queryset
 
     def create(self, request, *args, **kwargs):
         def _has_rights():
@@ -30,12 +37,13 @@ class CaseList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         demographic_data = self.request.data['demographic_data'] if 'demographic_data' in self.request.data else None
         medical_data = self.request.data['medical_data'] if 'medical_data' in self.request.data else None
-        social_data = self.request.data['social_data'] if 'social_data' in self.request.data else None
+        psychological_data = self.request.data['psychological_data'] if 'psychological_data' in self.request.data else None
         physical_data = self.request.data['physical_data'] if 'physical_data' in self.request.data else None
-        profile_data = self.request.data['profile_data'] if 'profile_data' in self.request.data else None
+        personal_data = self.request.data['personal_data'] if 'personal_data' in self.request.data else None
+        social_media_data = self.request.data['social_media_data'] if 'social_media_data' in self.request.data else None
 
-        serializer.save(demographic_data=demographic_data, medical_data=medical_data, social_data=social_data,
-                        physical_data=physical_data, profile_data=profile_data)
+        serializer.save(demographic_data=demographic_data, medical_data=medical_data, psychological_data=psychological_data,
+                        physical_data=physical_data, personal_data=personal_data, social_media_data=social_media_data)
 
 
 class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
@@ -63,9 +71,10 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         demographic_data = self.request.data['demographic_data'] if 'demographic_data' in self.request.data else None
         medical_data = self.request.data['medical_data'] if 'medical_data' in self.request.data else None
-        social_data = self.request.data['social_data'] if 'social_data' in self.request.data else None
+        psychological_data = self.request.data['psychological_data'] if 'psychological_data' in self.request.data else None
         physical_data = self.request.data['physical_data'] if 'physical_data' in self.request.data else None
-        profile_data = self.request.data['profile_data'] if 'profile_data' in self.request.data else None
+        personal_data = self.request.data['personal_data'] if 'personal_data' in self.request.data else None
+        social_media_data = self.request.data['social_media_data'] if 'social_media_data' in self.request.data else None
 
-        serializer.save(demographic_data=demographic_data, medical_data=medical_data, social_data=social_data,
-                        physical_data=physical_data, profile_data=profile_data)
+        serializer.save(demographic_data=demographic_data, medical_data=medical_data, psychological_data=psychological_data,
+                        physical_data=physical_data, personal_data=personal_data, social_media_data=social_media_data)

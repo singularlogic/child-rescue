@@ -25,9 +25,9 @@ class MedicalDataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in MedicalData._meta.fields]
 
 
-@admin.register(SocialData)
+@admin.register(PsychologicalData)
 class SocialDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in SocialData._meta.fields]
+    list_display = [field.name for field in PsychologicalData._meta.fields]
 
 
 @admin.register(PhysicalData)
@@ -35,6 +35,11 @@ class PhysicalDataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PhysicalData._meta.fields]
 
 
-@admin.register(ProfileData)
-class ProfileDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in ProfileData._meta.fields]
+@admin.register(PersonalData)
+class PersonalDataAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in PersonalData._meta.fields]
+
+
+@admin.register(SocialMediaData)
+class SocialMediaDataAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in SocialMediaData._meta.fields]

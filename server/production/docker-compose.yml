@@ -1,0 +1,13 @@
+version: '3'
+services:
+
+  child_rescue_production:
+    build:
+      context: ../../
+      dockerfile: server/production/Dockerfile
+    ports:
+      - 8082:8082
+    restart: unless-stopped
+    env_file: ./.env
+    network_mode: host
+    container_name: child-rescue

@@ -36,6 +36,7 @@ BASE_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django.contrib.gis',
 ]
 
 THIRD_PARTY_APPS = [
@@ -50,16 +51,21 @@ PRODUCT_APPS = [
     'core.users.apps.UsersConfig',
     'core.organizations.apps.OrganizationsConfig',
     'core.cases.apps.CasesConfig',
+    'core.alerts.apps.AlertsConfig',
     'core.evidences.apps.EvidencesConfig',
+    'core.choices.apps.ChoicesConfig',
     'core.firebase.apps.FirebaseConfig',
 
     'web_admin_app.web_admin_app_users.apps.WebAdminAppUsersConfig',
     'web_admin_app.web_admin_app_organizations.apps.WebAdminAppOrganizationsConfig',
     'web_admin_app.web_admin_app_cases.apps.WebAdminAppCasesConfig',
+    'web_admin_app.web_admin_app_alerts.apps.WebAdminAppAlertsConfig',
     'web_admin_app.web_admin_app_evidences.apps.WebAdminAppEvidencesConfig',
+    'web_admin_app.web_admin_app_choices.apps.WebAdminAppChoicesConfig',
 
     'mobile_app.mobile_app_users.apps.MobileAppUsersConfig',
     'mobile_app.mobile_app_cases.apps.MobileAppCasesConfig',
+    'mobile_app.mobile_app_alerts.apps.MobileAppAlertsConfig',
     'mobile_app.mobile_app_evidences.apps.MobileAppEvidencesConfig',
     'mobile_app.mobile_app_firebase.apps.MobileAppFirebaseConfig',
 ]
@@ -214,7 +220,8 @@ FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
 
 DATABASES = {
     "default": {
-        'ENGINE': 'django.db.backends.postgresql',
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        # 'ENGINE': 'django.db.backends.postgresql',
         "NAME": os.getenv('POSTGRES_DATABASE_NAME'),
         "USER": os.getenv('POSTGRES_DATABASE_USER'),
         "PASSWORD": os.getenv('POSTGRES_DATABASE_PASSWORD'),
