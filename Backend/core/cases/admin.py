@@ -26,7 +26,7 @@ class MedicalDataAdmin(admin.ModelAdmin):
 
 
 @admin.register(PsychologicalData)
-class SocialDataAdmin(admin.ModelAdmin):
+class PsychologicalDataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PsychologicalData._meta.fields]
 
 
@@ -43,3 +43,10 @@ class PersonalDataAdmin(admin.ModelAdmin):
 @admin.register(SocialMediaData)
 class SocialMediaDataAdmin(admin.ModelAdmin):
     list_display = [field.name for field in SocialMediaData._meta.fields]
+
+
+@admin.register(FacilityHistory)
+class FacilityHistoryAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in FacilityHistory._meta.fields]
+    list_display_links = ('id',)
+

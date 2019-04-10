@@ -5,12 +5,14 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.organizations.models import Organization
+from core.facilities.models import Facility
 from .utils import profile_image_path
 from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
+    facility = models.ForeignKey(Facility, on_delete=models.PROTECT, blank=True, null=True)
     ROLE_CHOICES = (
         ('admin', 'Administrator'),
         ('owner', 'Owner'),
@@ -62,7 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     def get_full_name(self):
-        return self.email
+        return self.first_name + ' ' + self.last_name
 
     def get_short_name(self):
         return self.email

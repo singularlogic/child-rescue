@@ -1,28 +1,65 @@
-from core.cases.models import DemographicData, MedicalData, PsychologicalData, PhysicalData, PersonalData, SocialMediaData
+import os
+import random
+import string
+import uuid
+from io import StringIO, BytesIO
+
+from PIL import Image, ExifTags
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class CaseUtils(object):
 
     @staticmethod
-    def get_demographic_data(child_id, case_id):
-        return DemographicData.objects.get(child=child_id, case=case_id)
+    def get_random_string(N):
+
+        random = str(uuid.uuid4())  # Convert UUID format to a Python string.
+        random = random.upper()  # Make all characters uppercase.
+        random = random.replace("-", "")  # Remove the UUID '-'.
+        return random[0:N]
 
     @staticmethod
-    def get_medical_data(child_id, case_id):
-        return MedicalData.objects.get(child=child_id, case=case_id)
+    def image_upload_path(instance, filename):
+        random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
+        path = 'tmp/{}.jpg'.format(instance.image, random_string)
+        return path
 
     @staticmethod
-    def get_psychological_data(child_id, case_id):
-        return PsychologicalData.objects.get(child=child_id, case=case_id)
+    def save_image(image):
+        try:
+            img = Image.open(image)
 
-    @staticmethod
-    def get_physical_data(child_id, case_id):
-        return PhysicalData.objects.get(child=child_id, case=case_id)
+            (img_name, img_ext) = os.path.splitext(image.name)
 
-    @staticmethod
-    def get_personal_data(child_id, case_id):
-        return PersonalData.objects.get(child=child_id, case=case_id)
+            # Add a random string of length 8 at the end of the image to make it unique
+            img_name += '_' + CaseUtils.get_random_string(8)
 
-    @staticmethod
-    def get_social_media_data(child_id, case_id):
-        return SocialMediaData.objects.get(child=child_id, case=case_id)
+            if hasattr(img, '_getexif'):  # only present in JPEGs
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                e = img._getexif()  # returns None if no EXIF data
+
+                if e is not None:
+                    exif = dict(e.items())
+                    orientation = exif[orientation]
+
+                    if orientation == 3:
+                        img = img.transpose(Image.ROTATE_180)
+                    elif orientation == 6:
+                        img = img.transpose(Image.ROTATE_270)
+                    elif orientation == 8:
+                        img = img.transpose(Image.ROTATE_90)
+
+            img.thumbnail((480, 480), Image.ANTIALIAS)
+            thumb_io = BytesIO()
+            img.save(thumb_io, format='JPEG')
+
+            thumb_file = InMemoryUploadedFile(ContentFile(thumb_io.getvalue()), None, img_name, 'image/jpeg',
+                                              os.sys.getsizeof(thumb_io), None)
+
+            return thumb_file
+
+        except Exception as ex:
+            print(ex)
