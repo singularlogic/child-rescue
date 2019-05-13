@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from django.db import models
 from django.db.models import F
-from django.utils.safestring import mark_safe
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance

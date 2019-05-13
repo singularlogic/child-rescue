@@ -31,6 +31,7 @@ urlpatterns = [
     path('web_admin/api/v1/feedbacks/', include('web_admin_app.web_admin_app_feedbacks.urls', namespace='web_admin_feedbacks_v1')),
     path('mobile/api/v1/users/', include('mobile_app.mobile_app_users.urls', namespace='mobile_users_v1')),
     path('mobile/api/v1/cases/', include('mobile_app.mobile_app_cases.urls', namespace='mobile_cases_v1')),
+    path('mobile/api/v1/alerts/', include('mobile_app.mobile_app_alerts.urls', namespace='mobile_alerts_v1')),
     path('mobile/api/v1/feedbacks/', include('mobile_app.mobile_app_feedbacks.urls', namespace='mobile_feedbacks_v1')),
 ]
 
