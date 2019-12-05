@@ -56,8 +56,8 @@ COPY ./server/develop/uwsgi.ini /home/docker/code/
 COPY ./server/develop/uwsgi_params /home/docker/code/
 
 WORKDIR /home/docker/code/app/Backend/
-RUN python3 manage.py collectstatic --noinput
-RUN python3 manage.py migrate
+#RUN python3 manage.py migrate
+#RUN python3 manage.py collectstatic --noinput
 
 
 EXPOSE 8082
