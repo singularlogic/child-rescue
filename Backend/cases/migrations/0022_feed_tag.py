@@ -6,13 +6,9 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cases', '0021_feed'),
+        ("cases", "0021_feed"),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='feed',
-            name='tag',
-            field=models.CharField(default='general', max_length=128),
-        ),
+        migrations.AddField(model_name="feed", name="tag", field=models.CharField(default="general", max_length=128),),
     ]

@@ -4,15 +4,14 @@ from cases.models import Case, Child
 
 
 class HasFilePermissions(permissions.BasePermission):
-
     def has_permission(self, request, view):
-        is_admin = request.user.role == 'admin'
+        is_admin = request.user.role == "admin"
         is_organization_admin = request.user.role in [
-            'organization_manager',
-            'coordinator',
-            'network_manager',
-            'case_manager',
-            'facility_manager',
+            "organization_manager",
+            "coordinator",
+            "network_manager",
+            "case_manager",
+            "facility_manager",
         ]
         case = get_object_or_404(Case, id=view.kwargs["pk"])
         if is_admin:
@@ -40,10 +39,7 @@ class HasCaseOrganizationAdminPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.role != "admin":
             case = Case.objects.get(pk=view.kwargs["pk"])
-            if (
-                request.user.organization_id is not None
-                and request.user.organization_id != case.organization_id
-            ):
+            if request.user.organization_id is not None and request.user.organization_id != case.organization_id:
                 self.message = "User does not belong to case organisation!"
                 return False
         return True
@@ -60,12 +56,20 @@ class HasCloseCasePermissions(permissions.BasePermission):
         return True
 
 
+class HasArchiveCasePermissions(permissions.BasePermission):
+    message = "Permission denied!"
+
+    def has_permission(self, request, view):
+        case = get_object_or_404(Case, pk=view.kwargs["pk"])
+        if case.status != "closed":  # check dis type, is_refugee and facts (valid/invalid)
+            self.message = "Selected case is not closed, so it cannot be archived!"
+            return False
+        return True
+
+
 class HasFacilityCasePermissionObj(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (
-            obj.status != "inactive"
-            or obj.facility.first().id == request.user.facility.id
-        )
+        return obj.status != "inactive" or obj.facility.first().id == request.user.facility.id
 
 
 class FacilityCaseStatePermissions(permissions.BasePermission):

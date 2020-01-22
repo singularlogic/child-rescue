@@ -12,9 +12,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 class OrganizationUtils(object):
     @staticmethod
     def logo_path(instance, filename):
-        random_string = "".join(
-            random.choice(string.ascii_uppercase + string.digits) for _ in range(32)
-        )
+        random_string = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32))
         path = "organizations/{}/{}.jpg".format(instance, random_string)
         return path
 
@@ -58,12 +56,7 @@ class OrganizationUtils(object):
             img.save(thumb_io, format="JPEG")
 
             thumb_file = InMemoryUploadedFile(
-                ContentFile(thumb_io.getvalue()),
-                None,
-                img_name,
-                "image/jpeg",
-                os.sys.getsizeof(thumb_io),
-                None,
+                ContentFile(thumb_io.getvalue()), None, img_name, "image/jpeg", os.sys.getsizeof(thumb_io), None,
             )
 
             return thumb_file

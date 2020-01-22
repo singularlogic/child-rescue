@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from oauth2_provider.models import AccessToken
 
+from analytics.analytics_basic import UserRanking
 from users.mobile_api.serializers import (
     UserSerializer,
     ForgotPasswordSerializer,
@@ -33,9 +34,7 @@ class UserCreate(generics.CreateAPIView):
                 email = request.data["email"].lower()
                 email_count = User.objects.filter(email=email).count()
                 if email_count != 0:
-                    return Response(
-                        ["Email already exists"], status=status.HTTP_403_FORBIDDEN
-                    )
+                    return Response(["Email already exists"], status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response(["Email is required"], status=status.HTTP_403_FORBIDDEN)
 
@@ -44,9 +43,7 @@ class UserCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class UserLogin(APIView):
@@ -79,9 +76,7 @@ class UserLogin(APIView):
         if "uuid" in request.data:
             uuid = Uuid.objects.filter(value=request.data["uuid"]).first()
 
-            oauth2_access_token = AccessToken.objects.get(
-                token=response["access_token"]
-            )
+            oauth2_access_token = AccessToken.objects.get(token=response["access_token"])
             user = oauth2_access_token.user
             if uuid is not None:
                 uuid.user = user
@@ -89,13 +84,10 @@ class UserLogin(APIView):
             user.last_login = datetime.datetime.now()
             user.save()
 
-
             action = "login"
             params = ""
             device = request.data.get("device", "")
-            UuidManagement.log_action(
-                request, request.data["uuid"], action, params, device
-            )
+            UuidManagement.log_action(request, request.data["uuid"], action, params, device)
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -158,6 +150,11 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        user = self.request.user
+        r = UserRanking(user)
+        fr = r.get_new_user_rank()
+        user.ranking = fr
+        user.save()
         return Response(serializer.data)
 
 
@@ -179,11 +176,7 @@ class ForgotPassword(APIView):
             subject = "Child Rescue Reset Password"
             email = loader.render_to_string(email_template_name, params)
             send_mail(
-                subject,
-                email,
-                "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+                subject, email, "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False,
             )
 
             content = {"response": "Reset password email sent successfully."}
@@ -238,6 +231,4 @@ class UuidActivityCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(uuid=uuid)
         headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

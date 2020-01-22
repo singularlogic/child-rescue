@@ -10,7 +10,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from alerts.models import Alert
-from cases.models import FacilityHistory, Case, Follower, CaseVolunteer, File, Feed
+from analytics.analytics_basic import IntelliSearch
+from blockchain.blockchain import changeStatus
+from cases.models import FacilityHistory, Case, Follower, CaseVolunteer, File, Feed, Child, SocialMedia
 from cases.utils import CaseUtils
 from cases.web_admin_api.permissions import (
     FacilityCaseStatePermissions,
@@ -18,6 +20,7 @@ from cases.web_admin_api.permissions import (
     HasCreateCasesPermissions,
     HasCloseCasePermissions,
     HasFilePermissions,
+    HasArchiveCasePermissions,
 )
 from firebase.models import FCMDevice
 from firebase.pyfcm import FCMNotification
@@ -26,8 +29,40 @@ from users.web_admin_api.permissions import (
     HasGeneralAdminPermissions,
     HasCaseManagerPermissions,
 )
-from .serializers import CaseSerializer, CasesSerializer, CaseVolunteerSerializer, FileSerializer, FeedSerializer
+from .serializers import (
+    # CaseSerializer,
+    CasesSerializer,
+    CaseVolunteerSerializer,
+    FileSerializer,
+    FeedSerializer,
+    ChildSerializer,
+    SocialMediaSerializer,
+)
 from tzlocal import get_localzone
+
+
+class ChildrenList(APIView):
+    def get(self, request, **kwargs):
+        name = request.query_params.get("name", None)
+        queryset = IntelliSearch().run_rawsql_namesearch(name, request.user.organization_id)
+        formatted_response = list()
+        for child in queryset:
+            formatted_response.append(
+                {
+                    "id": child[0],
+                    "first_name": child[1],
+                    "last_name": child[2],
+                    "case_id": child[3],
+                    "status": child[4],
+                    "rank": child[5],
+                }
+            )
+        return Response(formatted_response)
+
+
+class ChildDetails(generics.RetrieveAPIView):
+    queryset = Child.objects.all()
+    serializer_class = ChildSerializer
 
 
 class FeedList(generics.ListCreateAPIView):
@@ -80,8 +115,9 @@ class FeedList(generics.ListCreateAPIView):
                 registration_ids.append(device.registration_id)
             if len(registration_ids) <= 0:
                 return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT)
-        title = "New post for case: {}".format(case.personal_data.full_name)
-        self.send_notification(registration_ids, title, kwargs["pk"])
+        title = "New post for case: {}".format(case.custom_name)
+        if request.data["is_visible_to_volunteers"]:
+            self.send_notification(registration_ids, title, kwargs["pk"])
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -199,22 +235,10 @@ class DownloadFile(APIView):
 
 
 def save_case(data, serializer, owner=None):
-    demographic_data = data["demographic_data"] if "demographic_data" in data else None
-    medical_data = data["medical_data"] if "medical_data" in data else None
-    psychological_data = data["psychological_data"] if "psychological_data" in data else None
-    physical_data = data["physical_data"] if "physical_data" in data else None
-    personal_data = data["personal_data"] if "personal_data" in data else None
-    social_media_data = data["social_media_data"] if "social_media_data" in data else None
+    # social_media_data = data["social_media_data"] if "social_media_data" in data else None
     serializer.is_valid(raise_exception=True)
-    serializer.save(
-        demographic_data=demographic_data,
-        medical_data=medical_data,
-        psychological_data=psychological_data,
-        physical_data=physical_data,
-        personal_data=personal_data,
-        social_media_data=social_media_data,
-        owner=owner,
-    )
+    # serializer.save(social_media_data=social_media_data, owner=owner)
+    serializer.save(owner=owner)
 
 
 class CaseList(generics.ListCreateAPIView):
@@ -230,8 +254,32 @@ class CaseList(generics.ListCreateAPIView):
             return Case.get_web_queryset(child_id, organization_id).filter(status="active")
         elif is_active == "false":
             return Case.get_web_queryset(child_id, organization_id).filter(status="closed")
+        elif is_active == "archived":
+            return Case.get_web_queryset(child_id, organization_id).filter(status="archived")
         else:
             return Case.get_web_queryset(child_id, organization_id)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        data["full_name"] = "{} {}".format(data["first_name"], data["last_name"])
+        if "child_id" in data:
+            child_instance = get_object_or_404(Child, id=data["child_id"])
+            child_serializer = ChildSerializer(child_instance, data=request.data, partial=True)
+            child_serializer.is_valid()
+            child_serializer.save()
+        else:
+            child_serializer = ChildSerializer(data=data)
+            child_serializer.is_valid(raise_exception=True)
+            child_serializer.save()
+
+        data["child"] = child_serializer.data.get("id")
+        if request.user.role == "Facility_manager":
+            data["status"] = "inactive"
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         save_case(self.request.data, serializer, self.request.user)
@@ -239,7 +287,7 @@ class CaseList(generics.ListCreateAPIView):
 
 class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Case.objects.all()
-    serializer_class = CaseSerializer
+    serializer_class = CasesSerializer
     permission_classes = (
         HasGeneralAdminPermissions,
         HasCaseOrganizationAdminPermissions,
@@ -248,6 +296,9 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", True)
         instance = self.get_object()
+        data = request.data
+        if "first_name" in data or "last_name" in data:
+            data["full_name"] = "{} {}".format(data["first_name"], data["last_name"])
 
         if (
             "profile_photo" in request.data
@@ -258,6 +309,10 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
             profile_photo = request.data["profile_photo"]
             image = CaseUtils.save_image(profile_photo)
             request.data["profile_photo"] = image
+        else:
+            child_serializer = ChildSerializer(instance.child, data=request.data, partial=partial)
+            child_serializer.is_valid()
+            self.perform_update(child_serializer)
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid()
@@ -266,6 +321,25 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         save_case(self.request.data, serializer)
+
+
+class SocialMediaList(generics.ListCreateAPIView):
+    serializer_class = SocialMediaSerializer
+    # permission_classes = (HasGeneralAdminPermissions, HasCreateCasesPermissions)
+
+    def get_queryset(self):
+        case_id = self.request.query_params.get("case_id", None)
+        organization_id = self.request.user.organization_id
+        case = get_object_or_404(Case, id=case_id)
+        if organization_id != case.organization.id:
+            raise Exception
+        return SocialMedia.objects.filter(case=case)
+
+
+class SocialMediaDetails(generics.RetrieveUpdateAPIView):
+    queryset = SocialMedia.objects.all()
+    serializer_class = SocialMediaSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class AddCaseVolunteer(APIView):
@@ -290,7 +364,8 @@ class AddCaseVolunteer(APIView):
             print(exception)
 
     def post(self, request, *args, **kwargs):
-        user_ids = request.data
+        user_ids = request.data["userIds"]
+        message = request.data["message"]
         case_id = kwargs["pk"]
         case = get_object_or_404(Case, id=case_id)
         for user_id in user_ids:
@@ -306,9 +381,9 @@ class AddCaseVolunteer(APIView):
                 if len(registration_ids) <= 0:
                     return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT)
                 CaseVolunteer.objects.create(case=case, user=get_object_or_404(User, id=user_id))
-                title = "You have been invited to participate as a volunteer for case: {}".format(
-                    case.personal_data.full_name
-                )
+                title = "You have been invited to participate as a volunteer for case: {}".format(case.custom_name)
+                title += message
+                print(title)
                 self.send_notification(registration_ids, title)
         return Response("Case volunteers added!", status=status.HTTP_200_OK)
 
@@ -364,17 +439,15 @@ class FacilityCaseList(generics.ListAPIView):
 
         case_status = self.request.query_params.get("status", None)
         if case_status is not None and case_status == "active":
-            return Case.objects.filter(pk__in=cases_ids, status=case_status).order_by(
-                "-demographic_data__arrival_at_facility_date"
-            )[:8]
+            return Case.objects.filter(pk__in=cases_ids, status=case_status).order_by("-arrival_at_facility_date")[:8]
 
         presence_status = self.request.query_params.get("presence_status", None)
         if presence_status is not None:
             return Case.objects.filter(pk__in=cases_ids, presence_status=presence_status).order_by(
-                "-demographic_data__arrival_at_facility_date"
+                "-arrival_at_facility_date"
             )[:8]
 
-        return Case.objects.filter(pk__in=cases_ids).order_by("-demographic_data__arrival_at_facility_date")[:8]
+        return Case.objects.filter(pk__in=cases_ids).order_by("-arrival_at_facility_date")[:8]
 
 
 class FacilityCaseDetails(CaseDetails):
@@ -425,7 +498,7 @@ class CloseCase(APIView):
     def send_notification(case):
         data_message = {
             "type": "close_case_notification",
-            "title": case.personal_data.full_name,
+            "title": case.custom_name,
         }
         push_service = FCMNotification(api_key=settings.FIREBASE_API_KEY)
         followers = Follower.objects.filter(case=case.id, is_active=True).values_list("user", flat=True)
@@ -456,13 +529,14 @@ class CloseCase(APIView):
         if case.status == "active":
             Alert.objects.filter(case_id=case_id, is_active=True).update(is_active=False)
             case.status = "closed"
+            case.end_date = local_now
             case.save()
             self.send_notification(case)
         followers = Follower.objects.filter(case=case_id)
         for follower in followers:
             follower.is_active = False
             follower.save()
-
+        changeStatus(case.blockchain_address, case.status)
         return Response("Case {} closed".format(case_id), status=status.HTTP_200_OK)
 
 
@@ -470,23 +544,17 @@ class ArchiveCase(APIView):
     permission_classes = (
         HasCaseManagerPermissions,
         HasCaseOrganizationAdminPermissions,
+        HasArchiveCasePermissions,
     )
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         case_id = kwargs.pop("pk", None)
-
-        if case_id is None or not Case.objects.filter(pk=case_id, status__in=["closed"]).exists():
-            return Response("You should pass a valid/not archived case id", status=status.HTTP_404_NOT_FOUND,)
-
-        # close active alerts
-        # TODO: update log
         local_now = datetime.datetime.now(get_localzone())
         case = Case.objects.get(pk=case_id)
         case.status = "archived"
         case.save()
 
         # if the child was living in facility, change is_present/date_left in facility
-        # TODO: update log
-        FacilityHistory.objects.filter(case_id=case_id, is_active=True).update(is_active=False, date_left=local_now)
+        # FacilityHistory.objects.filter(case_id=case_id, is_active=True).update(is_active=False, date_left=local_now)
 
         return Response("Case {} archived".format(case_id), status=status.HTTP_200_OK)

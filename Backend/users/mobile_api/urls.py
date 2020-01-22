@@ -20,9 +20,7 @@ urlpatterns = [
     path("<int:pk>/", UserDetail.as_view(), name="user_details"),
     path("forgot-password/", ForgotPassword.as_view(), name="forgot_password"),
     path("reset-password/", PasswordReset.as_view(), name="password_reset"),
-    path(
-        "uuid-activities/", UuidActivityCreate.as_view(), name="uuid_activities_create"
-    ),
+    path("uuid-activities/", UuidActivityCreate.as_view(), name="uuid_activities_create"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

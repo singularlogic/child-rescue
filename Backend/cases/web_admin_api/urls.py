@@ -5,8 +5,12 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from .views import *
 
 urlpatterns = [
+    path("children/", ChildrenList.as_view(), name="case_list"),
+    path("children/<int:pk>/", ChildDetails.as_view(), name="case_details"),
     path("", CaseList.as_view(), name="case_list"),
     path("<int:pk>/", CaseDetails.as_view(), name="case_details"),
+    path("social_media/", SocialMediaList.as_view(), name="social_media_list"),
+    path("social_media/<int:pk>/", SocialMediaDetails.as_view(), name="social_media_details"),
     path("<int:pk>/volunteers/add/", AddCaseVolunteer.as_view(), name="add_case_volunteers"),
     path("<int:pk>/volunteers/", CaseVolunteerList.as_view(), name="case_volunteers"),
     path("<int:pk>/volunteers/<int:volunteer_id>/", CaseVolunteerDetails.as_view(), name="case_volunteers"),

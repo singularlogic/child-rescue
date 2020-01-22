@@ -10,28 +10,26 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('cases', '0020_auto_20191114_1108'),
+        ("cases", "0020_auto_20191114_1108"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Feed',
+            name="Feed",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=240)),
-                ('description', models.CharField(blank=True, max_length=4096, null=True)),
-                ('image', models.ImageField(blank=True, null=True, upload_to=cases.utils.CaseUtils.feed_image_path)),
-                ('address', models.CharField(blank=True, max_length=240, null=True)),
-                ('latitude', models.FloatField(blank=True, null=True)),
-                ('longitude', models.FloatField(blank=True, null=True)),
-                ('radius', models.FloatField(default=5.0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('case', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cases.Case')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("title", models.CharField(max_length=240)),
+                ("description", models.CharField(blank=True, max_length=4096, null=True)),
+                ("image", models.ImageField(blank=True, null=True, upload_to=cases.utils.CaseUtils.feed_image_path)),
+                ("address", models.CharField(blank=True, max_length=240, null=True)),
+                ("latitude", models.FloatField(blank=True, null=True)),
+                ("longitude", models.FloatField(blank=True, null=True)),
+                ("radius", models.FloatField(default=5.0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("case", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="cases.Case")),
+                ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
-            options={
-                'db_table': 'feed',
-            },
+            options={"db_table": "feed",},
         ),
     ]

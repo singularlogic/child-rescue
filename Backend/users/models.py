@@ -11,7 +11,6 @@ from .managers import UserManager
 
 
 class UserSet(UserManager):
-
     @staticmethod
     def get_users(organization=None, role=None):
         queryset = User.objects.all()
@@ -23,12 +22,8 @@ class UserSet(UserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, blank=True, null=True
-    )
-    facility = models.ForeignKey(
-        Facility, on_delete=models.PROTECT, blank=True, null=True
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
+    facility = models.ForeignKey(Facility, on_delete=models.PROTECT, blank=True, null=True)
     ROLE_CHOICES = (
         ("admin", "Administrator"),
         ("coordinator", "Coordinator"),
@@ -51,27 +46,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=14, blank=True, null=True)
     description = models.CharField(max_length=4096, blank=True, null=True)
     date_of_birth = models.DateTimeField(blank=True, null=True)
-    profile_image = models.ImageField(
-        upload_to=profile_image_path, blank=True, null=True
-    )
+    profile_image = models.ImageField(upload_to=profile_image_path, blank=True, null=True)
 
     def profile_image_element(self):
-        return mark_safe(
-            '<img src="http://localhost:8000/media/%s" width="16" height="16" />'
-            % self.profile_image
-        )
+        return mark_safe('<img src="http://localhost:8000/media/%s" width="16" height="16" />' % self.profile_image)
 
     is_staff = models.BooleanField(
-        _("staff status"),
-        default=False,
-        help_text=_("Designates whether the user can log into the admin site."),
+        _("staff status"), default=False, help_text=_("Designates whether the user can log into the admin site."),
     )
     is_active = models.BooleanField(
         _("active"),
         default=True,
         help_text=_(
-            "Designates whether this user should be treated as active. "
-            "Unselect this instead of deleting accounts."
+            "Designates whether this user should be treated as active. " "Unselect this instead of deleting accounts."
         ),
     )
     is_end_user = models.BooleanField(default=False)

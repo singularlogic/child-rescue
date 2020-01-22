@@ -9,25 +9,24 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('cases', '0017_casevolunteerlocation'),
+        ("cases", "0017_casevolunteerlocation"),
     ]
 
     operations = [
+        migrations.AlterModelOptions(name="casevolunteer", options={"verbose_name_plural": "case_volunteers"},),
         migrations.AlterModelOptions(
-            name='casevolunteer',
-            options={'verbose_name_plural': 'case_volunteers'},
+            name="casevolunteerlocation", options={"verbose_name_plural": "case_volunteer_locations"},
         ),
-        migrations.AlterModelOptions(
-            name='casevolunteerlocation',
-            options={'verbose_name_plural': 'case_volunteer_locations'},
-        ),
-        migrations.AlterModelOptions(
-            name='follower',
-            options={'verbose_name_plural': 'case_followers'},
-        ),
+        migrations.AlterModelOptions(name="follower", options={"verbose_name_plural": "case_followers"},),
         migrations.AddField(
-            model_name='case',
-            name='owner',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='owner', to=settings.AUTH_USER_MODEL),
+            model_name="case",
+            name="owner",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="owner",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

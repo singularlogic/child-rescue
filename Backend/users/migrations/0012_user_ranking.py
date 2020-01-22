@@ -6,13 +6,9 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0011_remove_user_is_team_leader'),
+        ("users", "0011_remove_user_is_team_leader"),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='user',
-            name='ranking',
-            field=models.FloatField(default=0.0),
-        ),
+        migrations.AddField(model_name="user", name="ranking", field=models.FloatField(default=0.0),),
     ]

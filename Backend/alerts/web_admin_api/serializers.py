@@ -6,6 +6,7 @@ from feedbacks.models import Feedback
 
 class AlertSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField(read_only=True)
+    custom_name = serializers.SerializerMethodField(read_only=True)
     disappearance_date = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     eye_color = serializers.SerializerMethodField()
@@ -22,7 +23,14 @@ class AlertSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_fullname(alert):
         if alert.case is not None:
-            return alert.case.personal_data.full_name
+            return alert.case.child.full_name
+        else:
+            return ""
+
+    @staticmethod
+    def get_custom_name(alert):
+        if alert.case is not None:
+            return alert.case.custom_name
         else:
             return ""
 
@@ -47,34 +55,34 @@ class AlertSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_eye_color(alert):
         if alert.case is not None:
-            return alert.case.physical_data.eye_color
+            return alert.case.eye_color
         else:
             return ""
 
     @staticmethod
     def get_hair_color(alert):
         if alert.case is not None:
-            return alert.case.physical_data.hair_color
+            return alert.case.hair_color
         else:
             return ""
 
     @staticmethod
     def get_height(alert):
         if alert.case is not None:
-            return alert.case.physical_data.height
+            return alert.case.height
         else:
             return ""
 
     @staticmethod
     def get_weight(alert):
         if alert.case is not None:
-            return alert.case.physical_data.weight
+            return alert.case.weight
         else:
             return ""
 
     @staticmethod
     def get_date_of_birth(alert):
         if alert.case is not None:
-            return alert.case.demographic_data.date_of_birth
+            return alert.case.child.date_of_birth
         else:
             return ""

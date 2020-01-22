@@ -111,15 +111,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create(
-            email=validated_data['email'].lower(),
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            role=validated_data['role'],
-            organization=validated_data['organization'],
+            email=validated_data["email"].lower(),
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            role=validated_data["role"],
+            organization=validated_data["organization"],
+            facility=validated_data["facility"],
+            address=validated_data["address"] if "address" in validated_data else None,
+            city=validated_data["city"] if "city" in validated_data else None,
+            latitude=validated_data["latitude"] if "latitude" in validated_data else None,
+            longitude=validated_data["longitude"] if "longitude" in validated_data else None,
+            phone=validated_data["phone"] if "phone" in validated_data else None,
+            description=validated_data["description"] if "description" in validated_data else None,
             is_end_user=True,
-            is_active=True
+            is_active=True,
         )
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.save()
         return user
 
@@ -129,7 +136,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_facility_name(user):
-        return user.facility.name if user.facility else ''
+        return user.facility.name if user.facility else ""
 
     @staticmethod
     def get_is_hosting_facility(user):

@@ -6,13 +6,9 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feedbacks', '0004_feedback_organization'),
+        ("feedbacks", "0004_feedback_organization"),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='feedback',
-            name='score',
-            field=models.FloatField(default=0.0),
-        ),
+        migrations.AddField(model_name="feedback", name="score", field=models.FloatField(default=0.0),),
     ]

@@ -1,4 +1,0 @@
-# Import from base.txt
--r base.txt
-
-django-extensions==2.2.3

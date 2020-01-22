@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from oauth2_provider.models import AccessToken
 
+from analytics.analytics_basic import UserRanking
 from users.models import User, Uuid
 from users.uuid_management import UuidManagement
 from users.web_admin_api.permissions import UserObjectPermissions, UserPermissions
@@ -25,11 +26,11 @@ from .serializers import (
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (UserPermissions, )
+    permission_classes = (UserPermissions,)
 
     def list(self, request, *args, **kwargs):
         organization = request.user.organization
-        role = request.query_params.get('role', None)
+        role = request.query_params.get("role", None)
         queryset = User.objects.get_users(organization=organization, role=role)
 
         page = self.paginate_queryset(queryset)
@@ -40,6 +41,14 @@ class UserList(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        # self.check_object_permissions(self.request, request.data.get("organization", None))
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -47,7 +56,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (UserObjectPermissions,)
 
     def get_object(self):
-        pk = self.kwargs.get('pk', None)
+        pk = self.kwargs.get("pk", None)
         self.check_object_permissions(self.request, get_object_or_404(User, id=pk))
         return User.objects.get(id=pk)
 
@@ -61,13 +70,19 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
+        r = UserRanking(instance)
+        fr = r.get_new_user_rank()
+        instance.ranking = fr
+        instance.save()
+
         return Response(serializer.data)
 
 
 class UserMe(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         try:
@@ -89,11 +104,15 @@ class UserMe(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        user = self.request.user
+        r = UserRanking(user)
+        fr = r.get_new_user_rank()
+        user.ranking = fr
+        user.save()
         return Response(serializer.data)
 
 
 class UserLogin(APIView):
-
     def post(self, request, *args, **kwargs):
         client_id = settings.OAUTH_CLIENT_ID
         client_secret = settings.OAUTH_CLIENT_SECRET
@@ -124,18 +143,14 @@ class UserLogin(APIView):
             uuid = Uuid.objects.filter(value=request.data["uuid"]).first()
 
             if uuid is not None:
-                oauth2_access_token = AccessToken.objects.get(
-                    token=response["access_token"]
-                )
+                oauth2_access_token = AccessToken.objects.get(token=response["access_token"])
                 uuid.user = oauth2_access_token.user
                 uuid.save()
 
             action = "login"
             params = ""
             device = request.data.get("device", "")
-            UuidManagement.log_action(
-                request, request.data["uuid"], action, params, device
-            )
+            UuidManagement.log_action(request, request.data["uuid"], action, params, device)
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -184,11 +199,7 @@ class ForgotPassword(APIView):
             subject = "Child Rescue Reset Password"
             email = loader.render_to_string(email_template_name, params)
             send_mail(
-                subject,
-                email,
-                "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
+                subject, email, "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False,
             )
 
             content = {"response": "Reset password email sent successfully."}

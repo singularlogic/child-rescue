@@ -19,7 +19,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_fullname(feedback):
         if feedback.case is not None:
-            return feedback.case.personal_data.full_name
+            return feedback.case.child.full_name
         else:
             return ""
 

@@ -32,7 +32,6 @@ class AlertSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "fullname",
-            "custom_name",
             "disappearance_date",
             "date_of_birth",
             "eye_color",
@@ -44,8 +43,9 @@ class AlertSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_fullname(alert):
+        # Careful here it is custom_name instead fullname
         if alert.case is not None:
-            return alert.case.personal_data.full_name
+            return alert.case.custom_name
         else:
             return ""
 
@@ -67,34 +67,34 @@ class AlertSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_eye_color(alert):
         if alert.case is not None:
-            return alert.case.physical_data.eye_color
+            return alert.case.eye_color
         else:
             return ""
 
     @staticmethod
     def get_hair_color(alert):
         if alert.case is not None:
-            return alert.case.physical_data.hair_color
+            return alert.case.hair_color
         else:
             return ""
 
     @staticmethod
     def get_height(alert):
         if alert.case is not None:
-            return alert.case.physical_data.height
+            return alert.case.height
         else:
             return ""
 
     @staticmethod
     def get_weight(alert):
         if alert.case is not None:
-            return alert.case.physical_data.weight
+            return alert.case.weight
         else:
             return ""
 
     @staticmethod
     def get_date_of_birth(alert):
         if alert.case is not None:
-            return alert.case.demographic_data.date_of_birth
+            return alert.case.child.date_of_birth
         else:
             return ""

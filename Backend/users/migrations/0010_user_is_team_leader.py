@@ -6,13 +6,9 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0009_auto_20191101_1419'),
+        ("users", "0009_auto_20191101_1419"),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='user',
-            name='is_team_leader',
-            field=models.NullBooleanField(default=False),
-        ),
+        migrations.AddField(model_name="user", name="is_team_leader", field=models.NullBooleanField(default=False),),
     ]

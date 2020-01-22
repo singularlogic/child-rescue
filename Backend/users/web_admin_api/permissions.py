@@ -8,8 +8,8 @@ class UserPermissions(permissions.BasePermission):
     message = "Permission denied!"
 
     def has_permission(self, request, view):
-        is_admin = request.user.role == 'admin'
-        is_organization_manager = request.user.role == 'organization_manager'
+        is_admin = request.user.role == "admin"
+        is_organization_manager = request.user.role == "organization_manager"
         belongs_to_organization = request.user.organization is not None
         if request.method == "POST":
             role = request.data.get("role", None)
@@ -25,7 +25,9 @@ class UserPermissions(permissions.BasePermission):
                 if facility is None:
                     self.message = "Admin type users must have facility!"
                     return False
-                if get_object_or_404(Facility, id=facility).organization != organization:
+                if not isinstance(organization, int):
+                    organization = organization.id
+                if get_object_or_404(Facility, id=facility).organization.id != organization:
                     self.message = "Facility must belong to user organization"
                     return False
             return is_admin or (is_organization_manager and belongs_to_organization)
@@ -34,14 +36,13 @@ class UserPermissions(permissions.BasePermission):
 
 
 class UserObjectPermissions(permissions.BasePermission):
-
     def has_object_permission(self, request, view, obj):
-        is_admin = request.user.role == 'admin'
-        is_organization_manager = request.user.role == 'organization_manager'
+        is_admin = request.user.role == "admin"
+        is_organization_manager = request.user.role == "organization_manager"
         belongs_to_organization = request.user.organization == obj.organization if not is_admin else True
-        if request.method == 'GET':
+        if request.method == "GET":
             return belongs_to_organization
-        elif request.method == 'DELETE':
+        elif request.method == "DELETE":
             return is_admin
         else:
             return is_admin or (is_organization_manager and belongs_to_organization)

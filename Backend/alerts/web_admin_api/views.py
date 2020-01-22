@@ -15,10 +15,8 @@ from alerts.web_admin_api.serializers import AlertSerializer
 from firebase.models import FCMDevice
 from firebase.pyfcm.fcm import FCMNotification
 from organizations.models import Organization
-from users.web_admin_api.permissions import (
-    HasCaseManagerPermissions,
-    HasGeneralAdminPermissions,
-)
+from analytics.web_admin_api.serializers import CountSerializer, AreaSerializer
+from users.web_admin_api.permissions import HasCaseManagerPermissions, HasGeneralAdminPermissions
 
 
 class LatestAlertList(generics.ListAPIView):
@@ -31,17 +29,13 @@ class LatestAlertList(generics.ListAPIView):
 
 class AlertList(generics.ListCreateAPIView):
     serializer_class = AlertSerializer
-    permission_classes = (
-        HasCaseManagerPermissions,
-        HasCreateAlertPermissions,
-        HasGetAlertPermissions,
-    )
+    permission_classes = (HasCaseManagerPermissions, HasCreateAlertPermissions, HasGetAlertPermissions)
 
     @staticmethod
     def send_notification(data):
         data_message = {
             "type": "alert_notification",
-            "title": data["fullname"],
+            "title": data["custom_name"],
             "description": data["description"],
             "latitude": data["latitude"],
             "longitude": data["longitude"],
@@ -81,14 +75,36 @@ class AlertList(generics.ListCreateAPIView):
         self.send_notification(serializer.data)
 
 
+class AlertCountList(APIView):
+    permission_classes = (HasCaseManagerPermissions, HasGetAlertPermissions)
+
+    def get(self, request, format=None):
+        case_id = self.request.query_params.get("caseId", None)
+        group_by = self.request.query_params.get("groupBy", None)
+        print("XOXOXOXOXO")
+        print(case_id)
+        print(group_by)
+        counts = Alert.objects.get_alert_count(case_id, group_by)
+        serializer = CountSerializer(counts)
+        print("999999999999999999999999999999")
+        print(serializer.data)
+        return Response(serializer.data)
+
+
+class AlertAreaCoveredList(generics.ListAPIView):
+    serializer_class = AreaSerializer
+    permission_classes = (HasCaseManagerPermissions, HasGetAlertPermissions)
+
+    def get_queryset(self):
+        case_id = self.request.query_params.get("caseId", None)
+        group_by = self.request.query_params.get("groupBy", None)
+        return Alert.objects.get_alert_area_covered(case_id, group_by)
+
+
 class AlertDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
-    permission_classes = (
-        HasCaseManagerPermissions,
-        HasAlertOrganizationAdminPermissions,
-        HasDeleteAlertPermissions,
-    )
+    permission_classes = (HasCaseManagerPermissions, HasAlertOrganizationAdminPermissions, HasDeleteAlertPermissions)
 
     def destroy(self, request, *args, **kwargs):
         alert_id = kwargs.pop("pk", None)
@@ -98,10 +114,7 @@ class AlertDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DeactivateAlert(APIView):
-    permission_classes = (
-        HasCaseManagerPermissions,
-        HasAlertOrganizationAdminPermissions,
-    )
+    permission_classes = (HasCaseManagerPermissions, HasAlertOrganizationAdminPermissions)
 
     @staticmethod
     def post(request, *args, **kwargs):

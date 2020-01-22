@@ -23,7 +23,7 @@ class OrganizationUsersSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_facility_name(user):
-        return user.facility.name if user.facility else ''
+        return user.facility.name if user.facility else ""
 
     @staticmethod
     def get_is_hosting_facility(user):

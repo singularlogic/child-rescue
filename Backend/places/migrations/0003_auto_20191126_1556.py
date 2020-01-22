@@ -8,18 +8,22 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('places', '0002_auto_20191126_1520'),
+        ("places", "0002_auto_20191126_1520"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='place',
-            name='feedback',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='feedbacks.Feedback'),
+            model_name="place",
+            name="feedback",
+            field=models.OneToOneField(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="feedbacks.Feedback"
+            ),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='user',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="place",
+            name="user",
+            field=models.OneToOneField(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

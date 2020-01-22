@@ -1,0 +1,3 @@
+[run]
+source = ./Backend
+omit = *migrations*, *tests*, Backend/media/*, Backend/Backend/*, Backend/static/*

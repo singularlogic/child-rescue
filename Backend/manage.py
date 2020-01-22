@@ -6,24 +6,18 @@ from dotenv import load_dotenv
 
 
 if __name__ == "__main__":
-    env_path = ".env"
+    env_path = "../.envs/.local/.django.env"
     load_dotenv(dotenv_path=env_path)
 
     try:
         # Check if settings are set through environment var.
         os.environ["DJANGO_SETTINGS_MODULE"]
     except KeyError:
-        staging = (
-            (len(sys.argv) > 1)
-            and (sys.argv[1] is not None)
-            and (sys.argv[1].startswith("staging"))
-        )
+        staging = (len(sys.argv) > 1) and (sys.argv[1] is not None) and (sys.argv[1].startswith("staging"))
         if staging:
             os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Backend.settings.staging")
         else:
-            os.environ.setdefault(
-                "DJANGO_SETTINGS_MODULE", "Backend.settings.development"
-            )
+            os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Backend.settings.development")
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
@@ -39,5 +33,4 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
-
     execute_from_command_line(sys.argv)

@@ -6,12 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cases', '0022_feed_tag'),
+        ("cases", "0022_feed_tag"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='feed',
-            name='title',
-        ),
+        migrations.RemoveField(model_name="feed", name="title",),
     ]

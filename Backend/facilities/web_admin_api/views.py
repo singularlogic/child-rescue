@@ -28,11 +28,12 @@ class FacilityList(generics.ListCreateAPIView):
     permission_classes = (HasFacilityPermissions,)
 
     def get_queryset(self):
+        is_hosting = self.request.query_params.get("is_hosting", None)
         if self.request.user.role == "admin":
             organization_id = self.request.query_params.get("organization_id", None)
         else:
             organization_id = self.request.user.organization_id
-        return Facility.objects.get_web_queryset(organization_id)
+        return Facility.objects.get_web_queryset(organization_id, is_hosting)
 
 
 class FacilityDetail(generics.RetrieveUpdateDestroyAPIView):

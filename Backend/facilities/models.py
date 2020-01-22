@@ -6,12 +6,13 @@ from organizations.models import Organization
 
 
 class FacilitySet(models.QuerySet):
-
     @staticmethod
-    def get_web_queryset(organization_id=None):
+    def get_web_queryset(organization_id=None, is_hosting=None):
         queryset = Facility.objects.all()
         if organization_id is not None:
             queryset = queryset.filter(organization_id=organization_id)
+        if is_hosting:
+            queryset = queryset.filter(supports_hosting=True)
         return queryset.order_by("id").reverse()
 
     @staticmethod
@@ -21,17 +22,10 @@ class FacilitySet(models.QuerySet):
         case = Case.objects.get(child_id=child_id)
         case.presence_status = "present"
         case.status = "inactive"
+        case.arrival_at_facility_date = date_entered
         case.save()
-        from cases.models import DemographicData
-
-        demographic_data = DemographicData.objects.get(case=case)
-        demographic_data.arrival_at_facility_date = date_entered
-        demographic_data.save()
         FacilityHistory.objects.create(
-            facility=Facility.objects.get(pk=facility_id),
-            case=case,
-            date_entered=date_entered,
-            is_active=True,
+            facility=Facility.objects.get(pk=facility_id), case=case, date_entered=date_entered, is_active=True,
         )
 
     @staticmethod
@@ -79,6 +73,4 @@ class Facility(models.Model):
         return self.name
 
     def get_full_address(self):
-        return (
-            self.address + " " + self.city + " " + self.postal_code + " " + self.country
-        )
+        return self.address + " " + self.city + " " + self.postal_code + " " + self.country

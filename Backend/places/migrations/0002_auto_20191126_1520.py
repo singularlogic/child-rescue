@@ -6,17 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('places', '0001_initial'),
+        ("places", "0001_initial"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='place',
-            name='radius',
-        ),
+        migrations.RemoveField(model_name="place", name="radius",),
         migrations.AlterField(
-            model_name='place',
-            name='description',
-            field=models.CharField(blank=True, max_length=8000, null=True),
+            model_name="place", name="description", field=models.CharField(blank=True, max_length=8000, null=True),
         ),
     ]

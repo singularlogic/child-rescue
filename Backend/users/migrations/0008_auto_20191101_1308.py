@@ -6,18 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0007_auto_20191101_1149'),
+        ("users", "0007_auto_20191101_1149"),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='user',
-            name='latitude',
-            field=models.FloatField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='longitude',
-            field=models.FloatField(blank=True, null=True),
-        ),
+        migrations.AddField(model_name="user", name="latitude", field=models.FloatField(blank=True, null=True),),
+        migrations.AddField(model_name="user", name="longitude", field=models.FloatField(blank=True, null=True),),
     ]

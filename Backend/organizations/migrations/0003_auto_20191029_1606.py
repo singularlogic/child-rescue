@@ -6,18 +6,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('organizations', '0002_auto_20191029_1606'),
+        ("organizations", "0002_auto_20191029_1606"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True),
+            model_name="organization", name="created_at", field=models.DateTimeField(auto_now_add=True),
         ),
-        migrations.AlterField(
-            model_name='organization',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True),
-        ),
+        migrations.AlterField(model_name="organization", name="updated_at", field=models.DateTimeField(auto_now=True),),
     ]

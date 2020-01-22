@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/v1/cases/", include("cases.urls", namespace="cases_v1")),
     path("api/v1/alerts/", include("alerts.urls", namespace="alerts_v1")),
     path("api/v1/feedbacks/", include("feedbacks.urls", namespace="feedbacks_v1")),
+    path("api/v1/analytics/", include("analytics.urls", namespace="analytics_v1")),
     path("api/v1/facilities/", include("facilities.urls", namespace="facilities_v1")),
     path("api/v1/places/", include("places.urls", namespace="places_v1")),
     path("api/v1/firebase/", include("firebase.urls", namespace="firebase_v1")),

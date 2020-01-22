@@ -94,7 +94,9 @@ class VolunteerCasesList(generics.ListAPIView):
         if has_accept_invitation == "all":
             queryset = CaseVolunteer.objects.filter(user=request.user)
         else:
-            queryset = CaseVolunteer.objects.filter(user=request.user, has_accept_invitation=has_accept_invitation)
+            queryset = CaseVolunteer.objects.filter(
+                user=request.user, has_accept_invitation=has_accept_invitation, case__status="active"
+            )
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -144,6 +146,26 @@ class VolunteerCasesLocation(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+class MyFeedList(generics.ListCreateAPIView):
+    queryset = Feed.objects.all()
+    serializer_class = FeedSerializer
+    permission_classes = (
+        permissions.IsAuthenticated,
+        HasVolunteerPermissions,
+    )
+
+    def list(self, request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        queryset = Feed.objects.filter(case=pk, user=request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class FeedList(generics.ListCreateAPIView):
     queryset = Feed.objects.all()
     serializer_class = FeedSerializer
@@ -173,3 +195,24 @@ class FeedList(generics.ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class VolunteerList(generics.ListCreateAPIView):
+    queryset = CaseVolunteer.objects.all()
+
+    serializer_class = CaseVolunteerSerializer
+    permission_classes = (
+        permissions.IsAuthenticated,
+        HasVolunteerPermissions,
+    )
+
+    def list(self, request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        queryset = CaseVolunteer.objects.filter(case=pk, has_accept_invitation=True)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

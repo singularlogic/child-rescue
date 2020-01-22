@@ -15,34 +15,9 @@ class CaseAdmin(admin.ModelAdmin):
     list_display_links = ("id",)
 
 
-@admin.register(DemographicData)
-class DemographicDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in DemographicData._meta.fields]
-
-
-@admin.register(MedicalData)
-class MedicalDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in MedicalData._meta.fields]
-
-
-@admin.register(PsychologicalData)
-class PsychologicalDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in PsychologicalData._meta.fields]
-
-
-@admin.register(PhysicalData)
-class PhysicalDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in PhysicalData._meta.fields]
-
-
-@admin.register(PersonalData)
-class PersonalDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in PersonalData._meta.fields]
-
-
-@admin.register(SocialMediaData)
-class SocialMediaDataAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in SocialMediaData._meta.fields]
+@admin.register(SocialMedia)
+class SocialMediaAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in SocialMedia._meta.fields]
 
 
 @admin.register(FacilityHistory)
