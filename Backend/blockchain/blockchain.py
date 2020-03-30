@@ -7,7 +7,6 @@ from django.conf import settings
 ETH_PROVIDER = settings.ETH_PROVIDER
 CONTRACT_ADDRESS = settings.CONTRACT_ADDRESS
 ETH_PRIVATE_KEY = settings.ETH_PRIVATE_KEY
-
 W3 = Web3(Web3.HTTPProvider(ETH_PROVIDER))
 ETH_ACCOUNT = W3.toChecksumAddress(settings.ETH_ACCOUNT)
 
@@ -31,6 +30,7 @@ except:
 # Creates new case contract and returns its address
 def createCase(status):
     try:
+        print("Create case")
         nonce = W3.eth.getTransactionCount(ETH_ACCOUNT)
         transaction = {"chainId": 4224, "gas": 1000000, "gasPrice": W3.eth.gasPrice, "nonce": nonce}
 
@@ -41,8 +41,9 @@ def createCase(status):
         logs = case_factory.events.CaseContractCreated().processReceipt(receipt)
         case_contract_address = logs[0]["args"]["newCaseContract"]
         return case_contract_address
-    except:
+    except Exception as exception:
         print("Unable to create case contract")
+        print(exception)
         return None
 
 
@@ -92,6 +93,7 @@ def createFeedback(
     feedback_image,
 ):
     try:
+        print("Create feedback")
         case_contract = W3.eth.contract(address=address, abi=CASE_CONTRACT_ABI)
     except:
         print("Invalid case contract address")

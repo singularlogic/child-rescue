@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 if __name__ == "__main__":
-    env_path = "../.envs/.local/.django.env"
+    env_path = "./.env"
     load_dotenv(dotenv_path=env_path)
 
     try:

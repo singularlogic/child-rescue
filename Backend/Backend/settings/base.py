@@ -40,6 +40,7 @@ BASE_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "rest_framework_swagger",
     "django_extensions",
     "corsheaders",
     "rest_framework",

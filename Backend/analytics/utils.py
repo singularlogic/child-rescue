@@ -11,10 +11,6 @@ class AnalyticsUtils:
         except Case.DoesNotExist:
             return None
         case_start = datetime.date(case.created_at)
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa")
-        print(case)
-        print(case.id)
-        print(case.status)
         if case.status == "active":
             case_end = datetime.date(datetime.now())
         else:
@@ -40,7 +36,4 @@ class AnalyticsUtils:
         else:
             delta = case_end - case_start
             interval = delta.days
-            print("interval")
-            print(case.id)
-            print(interval)
         return interval

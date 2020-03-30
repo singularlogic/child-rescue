@@ -39,8 +39,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # install uwsgi now because it takes a little while
-
 RUN pip3 install uwsgi
+
 
 COPY ./requirements /home/docker/code/app/requirements
 RUN pip3 install -r /home/docker/code/app/requirements/local.txt

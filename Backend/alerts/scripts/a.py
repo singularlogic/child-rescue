@@ -47,6 +47,6 @@ def run():
     cases = ceng.fetch_similar_closed_cases()
     # for mcase in cases:
     #     print(mcase.created_at, mcase.id)
-    print(cases.head())
+    # print(cases.head())
 
     print(">>> End scripts.")

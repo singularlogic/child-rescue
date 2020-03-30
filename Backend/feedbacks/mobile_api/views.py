@@ -51,11 +51,9 @@ class FeedbackList(generics.ListCreateAPIView):
         feedback = get_object_or_404(Feedback, id=serializer.data["id"])
         ff = FactEvalEngine(feedback)
         res = ff.evaluate(feedback)
-        print("fact score: %f" % res)
         feedback.score = res
         feedback.save()
 
-        print("CREATE FEEDBACK")
         createFeedback(
             address=str(feedback.case.blockchain_address),
             id=feedback.id,

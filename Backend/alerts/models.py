@@ -82,8 +82,6 @@ class AlertSet(models.QuerySet):
         except Case.DoesNotExist:
             return None
         cases = Case.objects.filter(organization=organization)
-        print("CASES")
-        print(cases)
         counts = []
         sum_average = 0
         for case in cases:
@@ -115,17 +113,12 @@ class AlertSet(models.QuerySet):
                     .annotate(count=Count("id"))
                     .order_by("date_field")
                 )
-            print("queryset")
-            print(queryset)
             sum_case_counts = 0
             for item in queryset:
-                print(item)
                 sum_case_counts += item["count"]
             interval = AnalyticsUtils.get_interval(case.id, group_by)
             case_average = (sum_case_counts / interval) if interval > 0 else 0
             # case_average = sum_case_counts / AnalyticsUtils.get_interval(case.id, group_by)
-            print("case_average")
-            print(case_average)
             if int(case_id) == case.id:
                 counts = queryset
             sum_average += case_average
@@ -137,7 +130,6 @@ class AlertSet(models.QuerySet):
     def get_alert_area_covered(case_id, group_by):
         queryset = []
         if len(Alert.objects.filter(case=case_id)) > 0:
-            print("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
             minDate = datetime.datetime.date(Alert.objects.filter(case=case_id).order_by("start")[0].start)
             maxDate = datetime.datetime.date(Alert.objects.filter(case=case_id).order_by("-end")[0].end)
             timedelta = datetime.timedelta(days=1)

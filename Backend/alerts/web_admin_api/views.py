@@ -81,13 +81,8 @@ class AlertCountList(APIView):
     def get(self, request, format=None):
         case_id = self.request.query_params.get("caseId", None)
         group_by = self.request.query_params.get("groupBy", None)
-        print("XOXOXOXOXO")
-        print(case_id)
-        print(group_by)
         counts = Alert.objects.get_alert_count(case_id, group_by)
         serializer = CountSerializer(counts)
-        print("999999999999999999999999999999")
-        print(serializer.data)
         return Response(serializer.data)
 
 
