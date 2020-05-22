@@ -4,7 +4,7 @@ from django.contrib.gis.db import models as geo_models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from blockchain.blockchain import createCase
+# from blockchain.blockchain import createCase
 from cases.utils import CaseUtils
 from facilities.models import Facility
 from organizations.models import Organization
@@ -41,7 +41,7 @@ class Case(models.Model):
     custom_name = models.CharField(max_length=100, blank=True, null=True)
     blockchain_address = models.CharField(max_length=256, blank=True, null=True)
     presence_status = models.CharField(
-        max_length=20, choices=CaseUtils.PRESENCE_STATUS_CHOICES, default="present", blank=True, null=True
+        max_length=20, choices=CaseUtils.PRESENCE_STATUS_CHOICES, default="present", blank=True, null=True,
     )
     status = models.CharField(max_length=20, choices=CaseUtils.CASE_STATUS_CHOICES, default="active")
     arrival_at_facility_date = models.DateField(blank=True, null=True)
@@ -54,7 +54,7 @@ class Case(models.Model):
 
     has_mobile_phone = models.CharField(max_length=20, choices=CaseUtils.MOBILE_CHOICES, blank=True, null=True)
     has_money_or_credit = models.CharField(
-        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_2_DATA_CHOICES, blank=True, null=True
+        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_2_DATA_CHOICES, blank=True, null=True,
     )
     has_area_knowledge = models.CharField(max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True)
     clothing_with_scent = models.CharField(max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True)
@@ -63,7 +63,7 @@ class Case(models.Model):
     volunteers_utilized = models.BooleanField(default=False)
     transit_country = models.CharField(max_length=1000, blank=True, null=True)
     disappearance_type = models.CharField(
-        max_length=20, choices=CaseUtils.DISAPPEARANCE_TYPE_CHOICES, blank=True, null=True
+        max_length=20, choices=CaseUtils.DISAPPEARANCE_TYPE_CHOICES, blank=True, null=True,
     )
     amber_alert = models.BooleanField(default=False)
     eye_color = models.CharField(max_length=20, blank=True, null=True)
@@ -98,27 +98,27 @@ class Case(models.Model):
         max_length=30, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True
     )
     living_environment = models.CharField(
-        max_length=30, choices=CaseUtils.LIVING_ENVIRONMENT_CHOICES, blank=True, null=True
+        max_length=30, choices=CaseUtils.LIVING_ENVIRONMENT_CHOICES, blank=True, null=True,
     )
     family_members = models.IntegerField(blank=True, null=True)
     school_grades = models.CharField(max_length=50, choices=CaseUtils.SCHOOL_GRADES_CHOICES, blank=True, null=True)
     hobbies = models.CharField(max_length=2048, blank=True, null=True)
     relationship_status = models.CharField(
-        max_length=50, choices=CaseUtils.RELATIONSHIP_STATUS_CHOICES, blank=True, null=True
+        max_length=50, choices=CaseUtils.RELATIONSHIP_STATUS_CHOICES, blank=True, null=True,
     )
     religion = models.CharField(max_length=50, blank=True, null=True)
     disappearance_reasons = models.CharField(
-        max_length=30, choices=CaseUtils.DISAPPEARANCE_REASON_CHOICES, blank=True, null=True
+        max_length=30, choices=CaseUtils.DISAPPEARANCE_REASON_CHOICES, blank=True, null=True,
     )
     parents_profile = models.CharField(max_length=20, choices=CaseUtils.PARENTS_PROFILE_CHOICES, blank=True, null=True)
     is_high_risk = models.CharField(
-        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_DATA_CHOICES, blank=True, null=True
+        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_DATA_CHOICES, blank=True, null=True,
     )
     is_first_time_missing = models.CharField(
         max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True
     )
     has_trafficking_history = models.CharField(
-        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_DATA_CHOICES, blank=True, null=True
+        max_length=20, choices=CaseUtils.BOOLEAN_POSSIBLE_DATA_CHOICES, blank=True, null=True,
     )
     is_refugee = models.CharField(max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True)
     legal_status = models.CharField(max_length=20, choices=CaseUtils.LEGAL_STATUS_CHOICES, blank=True, null=True)
@@ -149,25 +149,26 @@ class Case(models.Model):
                 return Case.objects.all()
 
 
-@receiver(post_save, sender=Case, dispatch_uid="update_case_blockchain")
-def update_case_blockchain(sender, instance, **kwargs):
-    if instance.blockchain_address is None:
-        blockchain_address = createCase(instance.status)
-        instance.blockchain_address = blockchain_address
-        instance.save()
+# blockchain_integration
+# @receiver(post_save, sender=Case, dispatch_uid="update_case_blockchain")
+# def update_case_blockchain(sender, instance, **kwargs):
+#     if instance.blockchain_address is None:
+#         blockchain_address = createCase(instance.status)
+#         instance.blockchain_address = blockchain_address
+#         instance.save()
 
 
 class SocialMedia(models.Model):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="social_media")
     medium = models.CharField(max_length=120, blank=True, null=True)
     published_photos = models.CharField(
-        max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True, default=None
+        max_length=20, choices=CaseUtils.BOOLEAN_DATA_CHOICES, blank=True, null=True, default=None,
     )
     followers = models.CharField(
-        max_length=20, choices=CaseUtils.FOLLOWERS_CHOICES, blank=True, null=True, default=None
+        max_length=20, choices=CaseUtils.FOLLOWERS_CHOICES, blank=True, null=True, default=None,
     )
     recent_activity = models.CharField(
-        max_length=20, choices=CaseUtils.RECENT_ACTIVITY_CHOICES, blank=True, null=True, default=None
+        max_length=20, choices=CaseUtils.RECENT_ACTIVITY_CHOICES, blank=True, null=True, default=None,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

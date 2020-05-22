@@ -13,6 +13,9 @@ INSTALLED_APPS += DEV_APPS
 # MEDIA_URL = "/media/"
 # MEDIA_ROOT = os.path.join(os.path.join(BASE_DIR), "../media")
 
+
+# STATIC_URL = "https://platform.childrescue.eu/static/"
+
 STATIC_URL = "/static/"
 STATIC_ROOT = "/home/docker/volatile/static"
 

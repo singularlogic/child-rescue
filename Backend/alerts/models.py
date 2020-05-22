@@ -22,16 +22,22 @@ from analytics.utils import AnalyticsUtils
 class AlertSet(models.QuerySet):
     def add_distance(self, latitude, longitude):
         return self.annotate(
-            distance=Distance("geolocation_point", Point(float(latitude), float(longitude), srid=4326))
+            distance=Distance(
+                "geolocation_point", Point(float(latitude), float(longitude), srid=4326)
+            )
         )
 
     def calc_distance(self, latitude, longitude):
-        return self.add_distance(latitude, longitude).filter(distance__lte=F("radius") * 1000)
+        return self.add_distance(latitude, longitude).filter(
+            distance__lte=F("radius") * 1000
+        )
 
     @staticmethod
     def calc_active():
         local_now = datetime.datetime.now(get_localzone())
-        return Alert.objects.filter(is_active=True, start__lt=local_now, end__gt=local_now)
+        return Alert.objects.filter(
+            is_active=True, start__lt=local_now, end__gt=local_now
+        )
 
     @staticmethod
     def mark_active():
@@ -42,7 +48,11 @@ class AlertSet(models.QuerySet):
             alert.save()
 
     def get_mobile_queryset(self, latitude, longitude):
-        result = self.calc_distance(latitude, longitude).filter(pk__in=Alert.objects.calc_active()).order_by("distance")
+        result = (
+            self.calc_distance(latitude, longitude)
+            .filter(pk__in=Alert.objects.calc_active())
+            .order_by("distance")
+        )
         return toolz.unique(result, key=lambda x: x.case)
 
     def get_latest_web_queryset(self, organization_id):
@@ -64,7 +74,9 @@ class AlertSet(models.QuerySet):
     @staticmethod
     def deactivate(alert_id):
         if alert_id is None:
-            return Response("We should pass a valid id", status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                "We should pass a valid id", status=status.HTTP_404_NOT_FOUND
+            )
 
         alert = Alert.objects.get(pk=alert_id)
         if not alert.is_active:
@@ -94,7 +106,9 @@ class AlertSet(models.QuerySet):
                     .order_by("date_field")
                 )
                 for i in range(len(queryset)):
-                    queryset[i]["date_field"] = datetime.datetime.date(queryset[i]["date_field"])
+                    queryset[i]["date_field"] = datetime.datetime.date(
+                        queryset[i]["date_field"]
+                    )
             elif group_by == "month":
                 queryset = list(
                     Alert.objects.filter(case=case_id)
@@ -104,7 +118,9 @@ class AlertSet(models.QuerySet):
                     .order_by("date_field")
                 )
                 for i in range(len(queryset)):
-                    queryset[i]["date_field"] = datetime.datetime.date(queryset[i]["date_field"])
+                    queryset[i]["date_field"] = datetime.datetime.date(
+                        queryset[i]["date_field"]
+                    )
             else:
                 queryset = list(
                     Alert.objects.filter(case=case_id)
@@ -130,12 +146,20 @@ class AlertSet(models.QuerySet):
     def get_alert_area_covered(case_id, group_by):
         queryset = []
         if len(Alert.objects.filter(case=case_id)) > 0:
-            minDate = datetime.datetime.date(Alert.objects.filter(case=case_id).order_by("start")[0].start)
-            maxDate = datetime.datetime.date(Alert.objects.filter(case=case_id).order_by("-end")[0].end)
+            minDate = datetime.datetime.date(
+                Alert.objects.filter(case=case_id).order_by("start")[0].start
+            )
+            maxDate = datetime.datetime.date(
+                Alert.objects.filter(case=case_id).order_by("-end")[0].end
+            )
             timedelta = datetime.timedelta(days=1)
             for i in range((maxDate - minDate).days + 1):
                 date = minDate + i * timedelta
-                result = list(Alert.objects.filter(case=case_id, start__date__lte=date, end__date__gte=date))
+                result = list(
+                    Alert.objects.filter(
+                        case=case_id, start__date__lte=date, end__date__gte=date
+                    )
+                )
                 if len(result) == 0:
                     queryset.append({"date": date, "area": "0"})
                 else:

@@ -16,14 +16,17 @@ FROM ubuntu:18.04
 
 MAINTAINER suite5
 
+ENV LANG C.UTF-8
+ENV PYTHONUNBUFFERED 1
+
 # Install required packages and remove the apt packages cache when done.
 
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
 	git \
-	python3 \
-	python3-dev \
+	python3.7 \
+	python3.7-dev \
 	python3-setuptools \
 	python3-pip \
 	nginx \

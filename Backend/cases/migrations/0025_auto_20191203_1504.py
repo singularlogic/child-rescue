@@ -11,10 +11,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="physicaldata", name="eye_color", field=models.CharField(blank=True, max_length=20, null=True),
+            model_name="physicaldata",
+            name="eye_color",
+            field=models.CharField(blank=True, max_length=20, null=True),
         ),
         migrations.AlterField(
-            model_name="physicaldata", name="hair_color", field=models.CharField(blank=True, max_length=20, null=True),
+            model_name="physicaldata",
+            name="hair_color",
+            field=models.CharField(blank=True, max_length=20, null=True),
         ),
         migrations.AlterField(
             model_name="physicaldata",

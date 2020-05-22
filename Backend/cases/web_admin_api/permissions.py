@@ -3,43 +3,16 @@ from rest_framework import permissions
 from cases.models import Case, Child
 
 
-class HasFilePermissions(permissions.BasePermission):
-    def has_permission(self, request, view):
-        is_admin = request.user.role == "admin"
-        is_organization_admin = request.user.role in [
-            "organization_manager",
-            "coordinator",
-            "network_manager",
-            "case_manager",
-            "facility_manager",
-        ]
-        case = get_object_or_404(Case, id=view.kwargs["pk"])
-        if is_admin:
-            return False
-        else:
-            belongs_to_organization = case.organization.id == request.user.organization_id
-            return is_organization_admin and belongs_to_organization
-
-
-class HasCreateCasesPermissions(permissions.BasePermission):
+class HasOrganizationPermissions(permissions.BasePermission):
     message = "Permission denied!"
 
     def has_permission(self, request, view):
-        if request.method == "POST":
-            if "child" in request.data and request.data["child"] is not None:
-                if not Child.objects.filter(pk=request.data["child"]).exists():
-                    self.message = "This child id does not exist"
-                    return False
-        return True
-
-
-class HasCaseOrganizationAdminPermissions(permissions.BasePermission):
-    message = "Permission denied!"
-
-    def has_permission(self, request, view):
-        if request.user.role != "admin":
-            case = Case.objects.get(pk=view.kwargs["pk"])
-            if request.user.organization_id is not None and request.user.organization_id != case.organization_id:
+        if "pk" in view.kwargs:
+            case = get_object_or_404(Case, id=view.kwargs["pk"])
+            if (
+                request.user.organization_id is not None
+                and request.user.organization_id != case.organization_id
+            ):
                 self.message = "User does not belong to case organisation!"
                 return False
         return True
@@ -61,7 +34,9 @@ class HasArchiveCasePermissions(permissions.BasePermission):
 
     def has_permission(self, request, view):
         case = get_object_or_404(Case, pk=view.kwargs["pk"])
-        if case.status != "closed":  # check dis type, is_refugee and facts (valid/invalid)
+        if (
+            case.status != "closed"
+        ):  # check dis type, is_refugee and facts (valid/invalid)
             self.message = "Selected case is not closed, so it cannot be archived!"
             return False
         return True
@@ -69,7 +44,10 @@ class HasArchiveCasePermissions(permissions.BasePermission):
 
 class HasFacilityCasePermissionObj(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.status != "inactive" or obj.facility.first().id == request.user.facility.id
+        return (
+            obj.status != "inactive"
+            or obj.facility.first().id == request.user.facility.id
+        )
 
 
 class FacilityCaseStatePermissions(permissions.BasePermission):

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +41,6 @@ BASE_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "rest_framework_swagger",
     "django_extensions",
     "corsheaders",
     "rest_framework",
@@ -177,7 +177,7 @@ FOURSQ_CONSUMER_SECRET = os.getenv("FOURSQ_CONSUMER_SECRET")
 EVENTFUL_API_KEY = os.getenv("EVENTFUL_API_KEY")
 
 # Machine learning models dir
-ML_DIR = os.getenv("ML_DIR")
+ML_DIR = "{}/".format(os.path.join(Path(BASE_DIR).parent, "mlmodels"))
 
 # Social Auth Pipeline
 
@@ -206,6 +206,7 @@ CSRF_COOKIE_NAME = "csrftoken"
 
 BASE_URL = os.getenv("BASE_URL")
 BASE_AUTH_URL = os.getenv("BASE_AUTH_URL")
+BASE_FE_URL = os.getenv("BASE_FE_URL")
 OAUTH_CLIENT_ID = os.getenv("OAUTH_CLIENT_ID")
 OAUTH_CLIENT_SECRET = os.getenv("OAUTH_CLIENT_SECRET")
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")

@@ -16,7 +16,13 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="user", name="is_private_account",),
         migrations.RemoveField(model_name="user", name="postal_code",),
         migrations.AlterField(
-            model_name="user", name="first_name", field=models.CharField(default="", max_length=256),
+            model_name="user",
+            name="first_name",
+            field=models.CharField(default="", max_length=256),
         ),
-        migrations.AlterField(model_name="user", name="last_name", field=models.CharField(default="", max_length=256),),
+        migrations.AlterField(
+            model_name="user",
+            name="last_name",
+            field=models.CharField(default="", max_length=256),
+        ),
     ]

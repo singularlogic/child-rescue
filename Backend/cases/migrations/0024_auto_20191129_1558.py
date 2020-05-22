@@ -15,7 +15,11 @@ class Migration(migrations.Migration):
             name="presence_status",
             field=models.CharField(
                 blank=True,
-                choices=[("present", "Present"), ("not_present", "Not present"), ("transit", "Transit")],
+                choices=[
+                    ("present", "Present"),
+                    ("not_present", "Not present"),
+                    ("transit", "Transit"),
+                ],
                 default="present",
                 max_length=20,
                 null=True,
@@ -39,7 +43,12 @@ class Migration(migrations.Migration):
             model_name="feed",
             name="tag",
             field=models.CharField(
-                choices=[("announcement", "Announcement"), ("task", "Task"), ("fact", "Fact"), ("general", "General")],
+                choices=[
+                    ("announcement", "Announcement"),
+                    ("task", "Task"),
+                    ("fact", "Fact"),
+                    ("general", "General"),
+                ],
                 default="general",
                 max_length=128,
             ),
@@ -63,7 +72,10 @@ class Migration(migrations.Migration):
             model_name="physicaldata",
             name="body_type",
             field=models.CharField(
-                blank=True, choices=[("fat", "Fat"), ("slim", "Slim"), ("normal", "Normal")], max_length=20, null=True
+                blank=True,
+                choices=[("fat", "Fat"), ("slim", "Slim"), ("normal", "Normal")],
+                max_length=20,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -103,7 +115,12 @@ class Migration(migrations.Migration):
             name="skin_color",
             field=models.CharField(
                 blank=True,
-                choices=[("white", "White"), ("brown", "Brown"), ("dark", "Dark"), ("other", "other")],
+                choices=[
+                    ("white", "White"),
+                    ("brown", "Brown"),
+                    ("dark", "Dark"),
+                    ("other", "other"),
+                ],
                 max_length=50,
                 null=True,
             ),
@@ -139,7 +156,12 @@ class Migration(migrations.Migration):
             name="school_absences",
             field=models.CharField(
                 blank=True,
-                choices=[("low", "Low"), ("medium", "Medium"), ("high", "High"), ("none", "None")],
+                choices=[
+                    ("low", "Low"),
+                    ("medium", "Medium"),
+                    ("high", "High"),
+                    ("none", "None"),
+                ],
                 max_length=50,
                 null=True,
             ),

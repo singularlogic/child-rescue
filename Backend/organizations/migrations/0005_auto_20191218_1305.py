@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="organization", name="address", field=models.CharField(blank=True, max_length=256, null=True),
+            model_name="organization",
+            name="address",
+            field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.AlterField(
             model_name="organization",
@@ -19,10 +21,14 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=4056, null=True),
         ),
         migrations.AlterField(
-            model_name="organization", name="email", field=models.CharField(blank=True, max_length=256, null=True),
+            model_name="organization",
+            name="email",
+            field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.AlterField(
-            model_name="organization", name="facebook", field=models.CharField(blank=True, max_length=128, null=True),
+            model_name="organization",
+            name="facebook",
+            field=models.CharField(blank=True, max_length=128, null=True),
         ),
         migrations.AlterField(
             model_name="organization",
@@ -30,7 +36,9 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=4056, null=True),
         ),
         migrations.AlterField(
-            model_name="organization", name="instagram", field=models.CharField(blank=True, max_length=128, null=True),
+            model_name="organization",
+            name="instagram",
+            field=models.CharField(blank=True, max_length=128, null=True),
         ),
         migrations.AlterField(
             model_name="organization",
@@ -38,9 +46,13 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=4056, null=True),
         ),
         migrations.AlterField(
-            model_name="organization", name="phone", field=models.CharField(blank=True, max_length=14, null=True),
+            model_name="organization",
+            name="phone",
+            field=models.CharField(blank=True, max_length=14, null=True),
         ),
         migrations.AlterField(
-            model_name="organization", name="twitter", field=models.CharField(blank=True, max_length=128, null=True),
+            model_name="organization",
+            name="twitter",
+            field=models.CharField(blank=True, max_length=128, null=True),
         ),
     ]

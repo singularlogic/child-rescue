@@ -42,15 +42,22 @@ class AlertSerializer(serializers.ModelSerializer):
         else:
             return ""
 
-    @staticmethod
-    def get_image(alert):
-        if alert.case is not None:
-            import os
+    # @staticmethod
+    # def get_image(alert):
+    #     if alert.case is not None:
+    #         import os
 
-            return os.getenv("BASE_URL") + "media/" + str(alert.case.profile_photo)
-            # return "http://localhost:8000/media/" + str(alert.case.profile_photo)
-        else:
-            return ""
+    #         return os.getenv("BASE_URL") + "media/" + str(alert.case.profile_photo)
+    #         # return "http://localhost:8000/media/" + str(alert.case.profile_photo)
+    #     else:
+    #         return ""
+
+    def get_image(self, alert):
+        request = self.context.get("request")
+        photo = alert.case.profile_photo
+        if photo is not None:
+            return request.build_absolute_uri(photo.url)
+        return None
 
     @staticmethod
     def get_eye_color(alert):

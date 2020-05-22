@@ -30,9 +30,13 @@ except:
 # Creates new case contract and returns its address
 def createCase(status):
     try:
-        print("Create case")
         nonce = W3.eth.getTransactionCount(ETH_ACCOUNT)
-        transaction = {"chainId": 4224, "gas": 1000000, "gasPrice": W3.eth.gasPrice, "nonce": nonce}
+        transaction = {
+            "chainId": 4224,
+            "gas": 1000000,
+            "gasPrice": W3.eth.gasPrice,
+            "nonce": nonce,
+        }
 
         txn = case_factory.functions.createCase(status).buildTransaction(transaction)
         signed_txn = W3.eth.account.signTransaction(txn, private_key=ETH_PRIVATE_KEY)
@@ -51,7 +55,12 @@ def createCase(status):
 def changeStatus(address, status):
     try:
         nonce = W3.eth.getTransactionCount(ETH_ACCOUNT)
-        transaction = {"chainId": 4224, "gas": 100000, "gasPrice": W3.eth.gasPrice, "nonce": nonce}
+        transaction = {
+            "chainId": 4224,
+            "gas": 100000,
+            "gasPrice": W3.eth.gasPrice,
+            "nonce": nonce,
+        }
 
         case_contract = W3.eth.contract(address=address, abi=CASE_CONTRACT_ABI)
         txn = case_contract.functions.changeStatus(status).buildTransaction(transaction)
@@ -93,14 +102,18 @@ def createFeedback(
     feedback_image,
 ):
     try:
-        print("Create feedback")
         case_contract = W3.eth.contract(address=address, abi=CASE_CONTRACT_ABI)
     except:
         print("Invalid case contract address")
         return False
 
     nonce = W3.eth.getTransactionCount(ETH_ACCOUNT)
-    transaction = {"chainId": 4224, "gas": 1000000, "gasPrice": W3.eth.gasPrice, "nonce": nonce}
+    transaction = {
+        "chainId": 4224,
+        "gas": 1000000,
+        "gasPrice": W3.eth.gasPrice,
+        "nonce": nonce,
+    }
 
     try:
         txn = case_contract.functions.createFeedback(

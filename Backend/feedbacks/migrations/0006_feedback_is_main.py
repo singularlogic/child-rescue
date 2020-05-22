@@ -10,5 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="feedback", name="is_main", field=models.BooleanField(default=False),),
+        migrations.AddField(
+            model_name="feedback",
+            name="is_main",
+            field=models.BooleanField(default=False),
+        ),
     ]

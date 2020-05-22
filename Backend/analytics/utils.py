@@ -11,10 +11,10 @@ class AnalyticsUtils:
         except Case.DoesNotExist:
             return None
         case_start = datetime.date(case.created_at)
-        if case.status == "active":
+        if case.status == "active" or case.status == "inactive":
             case_end = datetime.date(datetime.now())
         else:
-            case_end = case.end_date  # needs check
+            case_end = case.end_date
 
         if group_by == "week":
             case_start_week = case_start - timedelta(days=case_start.weekday())

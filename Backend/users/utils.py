@@ -2,6 +2,10 @@ import os
 import uuid
 
 from io import StringIO
+from django.conf import settings
+
+from django.core.mail import send_mail
+from django.template import loader
 
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -47,12 +51,7 @@ def save_profile_image(image, user):
         # or it is i.StringIO() - in Python2.7 it was StringIO.StringIO()
         img.save(thumb_io, format="JPEG")
         thumb_file = InMemoryUploadedFile(
-            ContentFile(thumb_io.getvalue()),
-            None,
-            img_name,
-            "image/jpeg",
-            thumb_io.len,
-            None,
+            ContentFile(thumb_io.getvalue()), None, img_name, "image/jpeg", thumb_io.len, None,
         )
         return thumb_file
     except Exception as ex:

@@ -10,5 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="feed", name="tag", field=models.CharField(default="general", max_length=128),),
+        migrations.AddField(
+            model_name="feed",
+            name="tag",
+            field=models.CharField(default="general", max_length=128),
+        ),
     ]

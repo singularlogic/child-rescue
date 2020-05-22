@@ -10,6 +10,7 @@ urlpatterns = [
     path("me/", UserMe.as_view(), name="me"),
     path("forgot-password/", ForgotPassword.as_view(), name="forgot_password"),
     path("reset-password/", PasswordReset.as_view(), name="password_reset"),
+    path("change-password/", ChangePassword.as_view(), name="password_change"),
     path("", UserList.as_view(), name="get_users"),
     path("<int:pk>/", UserDetail.as_view(), name="user_details"),
 ]

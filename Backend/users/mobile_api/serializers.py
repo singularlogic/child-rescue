@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
             is_end_user=validated_data["is_end_user"],
-            phone=validated_data["phone"],
+            phone=validated_data["phone"] if "phone" in validated_data else None,
             role="simple_user",
             is_active=True,
         )

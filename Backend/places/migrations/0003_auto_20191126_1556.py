@@ -16,14 +16,20 @@ class Migration(migrations.Migration):
             model_name="place",
             name="feedback",
             field=models.OneToOneField(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="feedbacks.Feedback"
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="feedbacks.Feedback",
             ),
         ),
         migrations.AlterField(
             model_name="place",
             name="user",
             field=models.OneToOneField(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
             ),
         ),
     ]

@@ -14,7 +14,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="SocialMedia",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("medium", models.CharField(blank=True, max_length=120, null=True)),
                 (
                     "published_photos",
@@ -61,14 +69,20 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
             ],
-            options={"verbose_name_plural": "social_media", "db_table": "social_media",},
+            options={
+                "verbose_name_plural": "social_media",
+                "db_table": "social_media",
+            },
         ),
         migrations.RemoveField(model_name="socialmediadata", name="case",),
         migrations.AlterField(
             model_name="case",
             name="addiction",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=30, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=30,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -107,7 +121,12 @@ class Migration(migrations.Migration):
             name="has_trafficking_history",
             field=models.CharField(
                 blank=True,
-                choices=[("yes", "Yes"), ("possibly", "Possibly"), ("no", "No"), (None, "Unknown")],
+                choices=[
+                    ("yes", "Yes"),
+                    ("possibly", "Possibly"),
+                    ("no", "No"),
+                    (None, "Unknown"),
+                ],
                 max_length=20,
                 null=True,
             ),
@@ -116,14 +135,20 @@ class Migration(migrations.Migration):
             model_name="case",
             name="health_issues",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=30, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=30,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="case",
             name="is_first_time_missing",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=20, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=20,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -131,7 +156,12 @@ class Migration(migrations.Migration):
             name="is_high_risk",
             field=models.CharField(
                 blank=True,
-                choices=[("yes", "Yes"), ("possibly", "Possibly"), ("no", "No"), (None, "Unknown")],
+                choices=[
+                    ("yes", "Yes"),
+                    ("possibly", "Possibly"),
+                    ("no", "No"),
+                    (None, "Unknown"),
+                ],
                 max_length=20,
                 null=True,
             ),
@@ -140,21 +170,30 @@ class Migration(migrations.Migration):
             model_name="case",
             name="is_refugee",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=20, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=20,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="case",
             name="medical_treatment_required",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=30, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=30,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="case",
             name="physical_disabilities",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=30, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=30,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -214,7 +253,12 @@ class Migration(migrations.Migration):
             name="stature",
             field=models.CharField(
                 blank=True,
-                choices=[("tall", "Tall"), ("short", "Short"), ("normal", "Normal"), (None, "Unknown")],
+                choices=[
+                    ("tall", "Tall"),
+                    ("short", "Short"),
+                    ("normal", "Normal"),
+                    (None, "Unknown"),
+                ],
                 max_length=20,
                 null=True,
             ),
@@ -223,7 +267,10 @@ class Migration(migrations.Migration):
             model_name="case",
             name="triggered_event",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=30, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=30,
+                null=True,
             ),
         ),
         migrations.AlterField(
@@ -241,7 +288,9 @@ class Migration(migrations.Migration):
             model_name="socialmedia",
             name="case",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="social_media", to="cases.Case"
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="social_media",
+                to="cases.Case",
             ),
         ),
     ]

@@ -12,6 +12,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="case", name="data", field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
+            model_name="case",
+            name="data",
+            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
     ]

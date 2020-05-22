@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_image = models.ImageField(upload_to=profile_image_path, blank=True, null=True)
 
     def profile_image_element(self):
-        return mark_safe('<img src="http://localhost:8000/media/%s" width="16" height="16" />' % self.profile_image)
+        return mark_safe('<img src="https://localhost:8000/media/%s" width="16" height="16" />' % self.profile_image)
 
     is_staff = models.BooleanField(
         _("staff status"), default=False, help_text=_("Designates whether the user can log into the admin site."),

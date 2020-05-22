@@ -1,22 +1,24 @@
 from django.conf import settings
 from django.contrib.gis.geos import Point
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from alerts.models import Alert
-from alerts.web_admin_api.permissions import (
-    HasAlertOrganizationAdminPermissions,
-    HasCreateAlertPermissions,
-    HasGetAlertPermissions,
-    HasDeleteAlertPermissions,
-)
-from alerts.web_admin_api.serializers import AlertSerializer
-from firebase.models import FCMDevice
 from firebase.pyfcm.fcm import FCMNotification
+
+from alerts.models import Alert
+from firebase.models import FCMDevice
 from organizations.models import Organization
+
 from analytics.web_admin_api.serializers import CountSerializer, AreaSerializer
-from users.web_admin_api.permissions import HasCaseManagerPermissions, HasGeneralAdminPermissions
+from alerts.web_admin_api.serializers import AlertSerializer
+
+from users.web_admin_api.permissions import (
+    HasCaseManagerPermissions,
+    HasGeneralAdminPermissions,
+)
+from alerts.web_admin_api.permissions import HasAlertOrganizationAdminPermissions
 
 
 class LatestAlertList(generics.ListAPIView):
@@ -29,7 +31,10 @@ class LatestAlertList(generics.ListAPIView):
 
 class AlertList(generics.ListCreateAPIView):
     serializer_class = AlertSerializer
-    permission_classes = (HasCaseManagerPermissions, HasCreateAlertPermissions, HasGetAlertPermissions)
+    permission_classes = (
+        HasAlertOrganizationAdminPermissions,
+        HasCaseManagerPermissions,
+    )
 
     @staticmethod
     def send_notification(data):
@@ -70,13 +75,18 @@ class AlertList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         organization = Organization.objects.get(id=self.request.user.organization_id)
-        geolocation_point = Point(float(self.request.data["latitude"]), float(self.request.data["longitude"]))
+        geolocation_point = Point(
+            float(self.request.data["latitude"]), float(self.request.data["longitude"])
+        )
         serializer.save(geolocation_point=geolocation_point, organization=organization)
         self.send_notification(serializer.data)
 
 
 class AlertCountList(APIView):
-    permission_classes = (HasCaseManagerPermissions, HasGetAlertPermissions)
+    permission_classes = (
+        HasAlertOrganizationAdminPermissions,
+        HasCaseManagerPermissions,
+    )
 
     def get(self, request, format=None):
         case_id = self.request.query_params.get("caseId", None)
@@ -88,7 +98,10 @@ class AlertCountList(APIView):
 
 class AlertAreaCoveredList(generics.ListAPIView):
     serializer_class = AreaSerializer
-    permission_classes = (HasCaseManagerPermissions, HasGetAlertPermissions)
+    permission_classes = (
+        HasAlertOrganizationAdminPermissions,
+        HasCaseManagerPermissions,
+    )
 
     def get_queryset(self):
         case_id = self.request.query_params.get("caseId", None)
@@ -99,7 +112,10 @@ class AlertAreaCoveredList(generics.ListAPIView):
 class AlertDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
-    permission_classes = (HasCaseManagerPermissions, HasAlertOrganizationAdminPermissions, HasDeleteAlertPermissions)
+    permission_classes = (
+        HasAlertOrganizationAdminPermissions,
+        HasAlertOrganizationAdminPermissions,
+    )
 
     def destroy(self, request, *args, **kwargs):
         alert_id = kwargs.pop("pk", None)
@@ -109,7 +125,10 @@ class AlertDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DeactivateAlert(APIView):
-    permission_classes = (HasCaseManagerPermissions, HasAlertOrganizationAdminPermissions)
+    permission_classes = (
+        HasCaseManagerPermissions,
+        HasAlertOrganizationAdminPermissions,
+    )
 
     @staticmethod
     def post(request, *args, **kwargs):

@@ -189,24 +189,26 @@ class ForgotPassword(APIView):
             user = get_object_or_404(User, email=email)
             params = {
                 "email": user.email,
-                "base_url": settings.BASE_AUTH_URL,
-                "site_name": "www.child-rescue.com",
-                "uid": urlsafe_base64_encode(force_bytes(user.pk)).decode(),
+                "base_url": settings.BASE_FE_URL,
+                "site_name": "platform.childrescue.eu",
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 "token": default_token_generator.make_token(user),
             }
-            email_template_name = "users/password_reset_email.html"
+            email_template_name = "users/reset_password.html"
             subject = "Child Rescue Reset Password"
-            email = loader.render_to_string(email_template_name, params)
+            # email = loader.render_to_string(email_template_name, params)
+            html_content = loader.get_template(email_template_name).render(params)
             send_mail(
-                subject, email, "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False,
+                subject,
+                "",
+                "Child Rescue <%s>" % settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+                html_message=html_content,
             )
-
-            content = {"response": "Reset password email sent successfully."}
-            return Response(content, status=status.HTTP_200_OK)
-
-        content = {"response": "Invalid data."}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            return Response("success", status=status.HTTP_200_OK)
+        return Response("not_foud", status=status.HTTP_404_NOT_FOUND)
 
 
 class PasswordReset(APIView):
@@ -229,4 +231,25 @@ class PasswordReset(APIView):
             return Response(content, status=status.HTTP_404_NOT_FOUND)
 
         content = {"data": "Invalid data"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePassword(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, format=None):
+        print(request.data)
+        old_password = request.data["oldPassword"]
+        print(old_password)
+
+        user = self.request.user
+        if user is not None:
+            if user.check_password(old_password):
+                user.set_password(request.data["password"])
+                user.save()
+                return Response("success", status=status.HTTP_201_CREATED)
+            else:
+                return Response("invalid_old_password", status=status.HTTP_201_CREATED)
+        else:
+            content = {"data": "Invalid data"}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)

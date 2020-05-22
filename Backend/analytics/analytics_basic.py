@@ -1,5 +1,3 @@
-# Prerequisites for postgresql DB:
-
 import os
 
 from cases.models import Child
@@ -12,7 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 import pickle
 import pandas as pd
 from datetime import datetime
-from .analytics_utils import AnalyticsUtils
+from .analytics_utils import getDistance, getDistanceTravelled, getDuration
 
 
 class IntelliSearch(object):
@@ -21,7 +19,9 @@ class IntelliSearch(object):
 
         self.conn = connection
 
-    def run_rawsql_namesearch(self, full_name_str, org_id, type="LEVENSHTEIN", thres=11, limit=10):
+    def run_rawsql_namesearch(
+        self, full_name_str, org_id, type="LEVENSHTEIN", thres=11, limit=10
+    ):
         from django.db import Error
 
         connection = self.conn
@@ -48,7 +48,13 @@ class IntelliSearch(object):
                         WHERE LEVENSHTEIN(concat_ws(' ', first_name, last_name), %s) <= %s \
                         AND c.organization_id = %s AND c.created_at = (SELECT MAX(created_at) FROM \"case\" WHERE child_id = child.id)\
                         ORDER BY LEV ASC LIMIT %s",
-                        [full_name_str, full_name_str, str(lev_threshold), str(org_id), str(limit)],
+                        [
+                            full_name_str,
+                            full_name_str,
+                            str(lev_threshold),
+                            str(org_id),
+                            str(limit),
+                        ],
                     )
                     rows = cursor.fetchall()
                 else:  # trigram similarity
@@ -59,7 +65,13 @@ class IntelliSearch(object):
                         WHERE SIMILARITY(concat_ws(' ', first_name, last_name), %s) > %s \
                         AND c.organization_id = %s AND c.created_at = (SELECT MAX(created_at) FROM \"case\" WHERE child_id = child.id)\
                         ORDER BY SIM DESC LIMIT %s",
-                        [full_name_str, full_name_str, str(sim_threshold), str(org_id), str(limit)],
+                        [
+                            full_name_str,
+                            full_name_str,
+                            str(sim_threshold),
+                            str(org_id),
+                            str(limit),
+                        ],
                     )
                     rows = cursor.fetchall()
         except Error as e:
@@ -112,10 +124,14 @@ class UserRanking(object):
         cuser = self.curr_user
         su_rate = 0
         if latest == -1:
-            arch_facts = Feedback.objects.filter(user=cuser).filter(is_valid__isnull=False)
+            arch_facts = Feedback.objects.filter(user=cuser).filter(
+                is_valid__isnull=False
+            )
         else:
             arch_facts = (
-                Feedback.objects.filter(user=cuser).filter(is_valid__isnull=False).order_by("-created_at")[:latest]
+                Feedback.objects.filter(user=cuser)
+                .filter(is_valid__isnull=False)
+                .order_by("-created_at")[:latest]
             )
         if arch_facts.count() > 0:
             true_facts_num = 0
@@ -132,7 +148,9 @@ class UserRanking(object):
         cuser = self.curr_user
         sp_rate = 0
         if latest > 0:
-            recent_facts = Feedback.objects.filter(user=cuser).order_by("-created_at")[:latest]
+            recent_facts = Feedback.objects.filter(user=cuser).order_by("-created_at")[
+                :latest
+            ]
         else:
             recent_facts = Feedback.objects.filter(user=cuser).order_by("-created_at")
 
@@ -155,7 +173,9 @@ class UserRanking(object):
                 comple = self.get_profile_completeness()
                 su_rate = self.get_sucessrate_facts()
                 sp_rate = self.get_spamrate_facts()
-                final_ranking = BR + (BR * ((comple + su_rate) / 2 - sp_rate))  # in [0, 2*curr_ranking]
+                final_ranking = BR + (
+                    BR * ((comple + su_rate) / 2 - sp_rate)
+                )  # in [0, 2*curr_ranking]
             except:
                 raise
         return final_ranking
@@ -173,27 +193,28 @@ class FactEvalEngine(object):
             self.caseid = fact.case_id
             self.main_fact = Feedback.objects.get(case=fact.case_id, is_main=True)
 
-    def compute_max_dist_travelled(self, point1_date, point2_date):
-        au = AnalyticsUtils()
-        return au.getDistanceTravelled(point1_date, point2_date, "auto")
+    def compute_max_dist_travelled(self):
+        inifact = self.main_fact
+        dist = None
+        if inifact:
+            dist = getDistanceTravelled(then=inifact.date, speed="default")
+        return dist
 
     def compute_dist_diff_km(self):
-        au = AnalyticsUtils()
         inifact = self.main_fact
         curfact = self.fact
-        max_d = au.getDistanceTravelled(then=inifact.date, speed="auto")
+        max_d = getDistanceTravelled(then=inifact.date, speed="auto")
         point1 = (inifact.latitude, inifact.longitude)
         point2 = (curfact.latitude, curfact.longitude)
-        fact_d = au.getDistance(point1, point2)
+        fact_d = getDistance(point1, point2)
         ddiff = max_d - fact_d
         print("ddif: %f" % ddiff)
         return ddiff > 0
 
     def compute_time_diff_hh(self):
-        au = AnalyticsUtils()
         inifact = self.main_fact
         curfact = self.fact
-        hours = au.getDuration(inifact.date, curfact.date, "hours")
+        hours = getDuration(inifact.date, curfact.date, "hours")
         print("hours diff: %d" % hours)
         return hours > 0
 
@@ -206,8 +227,12 @@ class FactEvalEngine(object):
         print(">>> Training model for organisation with id:%s" % prefix)
         modelname = prefix + "_facteval_model.pcl"
         vectorizername = prefix + "_facteval_vectorizer.pcl"
-        facts = Feedback.objects.filter(organization=org_id).exclude(feedback_status="pending", comment__isnull=True)
-        data_df = pd.DataFrame(list(facts.values("id", "comment", "score", "feedback_status")))
+        facts = Feedback.objects.filter(organization=org_id).exclude(
+            feedback_status="pending", comment__isnull=True
+        )
+        data_df = pd.DataFrame(
+            list(facts.values("id", "comment", "score", "feedback_status"))
+        )
         data_df["label"] = (data_df["feedback_status"] == "spam").astype(int)
         data_df.drop(columns=["feedback_status"], inplace=True)
 
@@ -224,7 +249,9 @@ class FactEvalEngine(object):
             strip_accents="unicode",
         )
         # print(vectorizer.fit_transform(data_df["comment"]))
-        data_df["textVect"] = list(vectorizer.fit_transform(data_df["comment"]).toarray())
+        data_df["textVect"] = list(
+            vectorizer.fit_transform(data_df["comment"]).toarray()
+        )
 
         # Perform training
         model = DecisionTreeClassifier()
@@ -260,7 +287,9 @@ class FactEvalEngine(object):
         # Compute prediction for given fact
         doc = fact.comment
         tfidf_vectorizer_vector = vectorizer.transform([doc])
-        score = ml_model.predict_proba(tfidf_vectorizer_vector)  # two values ['not spam prob' 'spam prob']
+        score = ml_model.predict_proba(
+            tfidf_vectorizer_vector
+        )  # two values ['not spam prob' 'spam prob']
         return score[0][1]  # return spam probability
 
     def evaluate(self, cfact=None):

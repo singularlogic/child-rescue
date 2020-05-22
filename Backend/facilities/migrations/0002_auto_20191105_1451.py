@@ -11,10 +11,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(model_name="facility", name="geolocation_point",),
-        migrations.AddField(model_name="facility", name="latitude", field=models.FloatField(blank=True, null=True),),
-        migrations.AddField(model_name="facility", name="longitude", field=models.FloatField(blank=True, null=True),),
-        migrations.AlterField(model_name="facility", name="name", field=models.CharField(max_length=128),),
+        migrations.AddField(
+            model_name="facility",
+            name="latitude",
+            field=models.FloatField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="facility",
+            name="longitude",
+            field=models.FloatField(blank=True, null=True),
+        ),
         migrations.AlterField(
-            model_name="facility", name="supports_hosting", field=models.BooleanField(default=False),
+            model_name="facility", name="name", field=models.CharField(max_length=128),
+        ),
+        migrations.AlterField(
+            model_name="facility",
+            name="supports_hosting",
+            field=models.BooleanField(default=False),
         ),
     ]

@@ -12,5 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(name="casevolunteer", unique_together={("case", "user")},),
+        migrations.AlterUniqueTogether(
+            name="casevolunteer", unique_together={("case", "user")},
+        ),
     ]

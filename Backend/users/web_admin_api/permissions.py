@@ -27,7 +27,10 @@ class UserPermissions(permissions.BasePermission):
                     return False
                 if not isinstance(organization, int):
                     organization = organization.id
-                if get_object_or_404(Facility, id=facility).organization.id != organization:
+                if (
+                    get_object_or_404(Facility, id=facility).organization.id
+                    != organization
+                ):
                     self.message = "Facility must belong to user organization"
                     return False
             return is_admin or (is_organization_manager and belongs_to_organization)
@@ -39,7 +42,9 @@ class UserObjectPermissions(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         is_admin = request.user.role == "admin"
         is_organization_manager = request.user.role == "organization_manager"
-        belongs_to_organization = request.user.organization == obj.organization if not is_admin else True
+        belongs_to_organization = (
+            request.user.organization == obj.organization if not is_admin else True
+        )
         if request.method == "GET":
             return belongs_to_organization
         elif request.method == "DELETE":
@@ -61,7 +66,7 @@ class HasGeneralAdminPermissions(permissions.BasePermission):
             return False
         if request.user.role is None and request.user.role not in [
             "admin",
-            "owner",
+            "organization_manager",
             "coordinator",
             "case_manager",
             "network_manager",
@@ -76,12 +81,48 @@ class HasCaseManagerPermissions(permissions.BasePermission):
     message = "Permission denied!"
 
     def has_permission(self, request, view):
-        if request.user.role is None and request.user.role not in [
-            "admin",
-            "owner",
+        if request.user.role is None:
+            return False
+        is_manager = request.user.role in [
+            "organization_manager",
+            "coordinator",
+            "network_manager",
+            "case_manager",
+            "facility_manager",
+        ]
+        is_case_manager = request.user.role in [
+            "organization_manager",
             "coordinator",
             "case_manager",
-        ]:
-            self.message = "User has not proper admin rights!"
+            "facility_manager",
+        ]
+
+        if request.method == "GET":
+            return is_manager
+        else:
+            return is_case_manager
+
+
+class HasNetworkManagerPermissions(permissions.BasePermission):
+    message = "Permission denied!"
+
+    def has_permission(self, request, view):
+        if request.user.role is None:
             return False
-        return True
+        is_manager = request.user.role in [
+            "organization_manager",
+            "coordinator",
+            "network_manager",
+            "case_manager",
+            "facility_manager",
+        ]
+        is_network_manager = request.user.role in [
+            "organization_manager",
+            "coordinator",
+            "network_manager",
+        ]
+
+        if request.method == "GET":
+            return is_manager
+        else:
+            return is_network_manager

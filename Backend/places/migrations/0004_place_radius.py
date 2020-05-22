@@ -10,5 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="place", name="radius", field=models.FloatField(default=5.0),),
+        migrations.AddField(
+            model_name="place", name="radius", field=models.FloatField(default=5.0),
+        ),
     ]

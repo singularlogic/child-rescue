@@ -16,7 +16,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="SocialNetworksData",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("type", models.CharField(blank=True, max_length=500, null=True)),
                 (
                     "source",
@@ -32,17 +40,30 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("geolocation_point", django.contrib.gis.db.models.fields.PointField(blank=True, null=True, srid=4326)),
+                (
+                    "geolocation_point",
+                    django.contrib.gis.db.models.fields.PointField(
+                        blank=True, null=True, srid=4326
+                    ),
+                ),
                 ("latitude", models.FloatField()),
                 ("longitude", models.FloatField()),
                 ("address", models.CharField(blank=True, max_length=500, null=True)),
                 ("city", models.CharField(blank=True, max_length=500, null=True)),
                 ("venue", models.CharField(blank=True, max_length=500, null=True)),
-                ("description", models.CharField(blank=True, max_length=2000, null=True)),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=2000, null=True),
+                ),
                 ("start", models.DateTimeField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("case", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="cases.Case")),
+                (
+                    "case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="cases.Case"
+                    ),
+                ),
                 (
                     "organization",
                     models.ForeignKey(

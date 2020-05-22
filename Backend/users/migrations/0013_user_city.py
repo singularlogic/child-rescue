@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="user", name="city", field=models.CharField(blank=True, max_length=250, null=True),
+            model_name="user",
+            name="city",
+            field=models.CharField(blank=True, max_length=250, null=True),
         ),
     ]

@@ -92,6 +92,50 @@ class UserLogin(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
+class DeleteAccount(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        print(user)
+        print(user.role)
+
+        if user.role != "simple_user":
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        client_id = settings.OAUTH_CLIENT_ID
+        client_secret = settings.OAUTH_CLIENT_SECRET
+        url = settings.BASE_AUTH_URL + "auth/revoke-token/"
+
+        params = {
+            "token": request.auth.token,
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+
+        requests.post(url, data=params)
+
+        from feedbacks.models import Feedback
+        import uuid
+
+        user_uuid = uuid.uuid4().hex[:14]
+        user_feedbacks = Feedback.objects.filter(user=user)
+        if user_feedbacks and len(user_feedbacks) > 0:
+            for user_feedback in user_feedbacks:
+                user_feedback.source = user_uuid
+                user_feedback.save()
+
+        user.first_name = user_uuid
+        user.last_name = user_uuid
+        user.email = "{}@user.com".format(user.id)
+        user.address = user_uuid
+        user.city = user_uuid
+        user.phone = user_uuid
+        user.description = user_uuid
+        user.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class UserLogout(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

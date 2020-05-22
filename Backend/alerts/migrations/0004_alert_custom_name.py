@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="alert", name="custom_name", field=models.CharField(blank=True, max_length=100, null=True),
+            model_name="alert",
+            name="custom_name",
+            field=models.CharField(blank=True, max_length=100, null=True),
         ),
     ]

@@ -1,3 +1,5 @@
+import analytics.analytics_case as ac
+
 from rest_framework import serializers
 
 from cases.models import (
@@ -33,11 +35,29 @@ class SocialMediaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SimilarCasesSerializer(serializers.ModelSerializer):
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Case
+        fields = "__all__"
+
+    @staticmethod
+    def get_first_name(case):
+        return case.child.first_name
+
+    @staticmethod
+    def get_last_name(case):
+        return case.child.last_name
+
+
 class CasesSerializer(serializers.ModelSerializer):
 
     disappearance_date = serializers.SerializerMethodField(read_only=True)
     disappearance_location = serializers.SerializerMethodField(read_only=True)
     arrival_date = serializers.SerializerMethodField()
+    # profile_photo = serializers.SerializerMethodField()
 
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
@@ -54,6 +74,12 @@ class CasesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = "__all__"
+
+    # def get_profile_photo(self, instance):
+    #     if not instance.profile_photo:
+    #         return None
+    #     request = self.context.get("request")
+    #     return request.build_absolute_uri(instance.profile_photo.url)
 
     def get_current_facility_id(self, case):
         try:
@@ -118,6 +144,22 @@ class CasesSerializer(serializers.ModelSerializer):
             return feedbacks[0].address
         else:
             return ""
+
+    # def create(self, validated_data):
+    #     case = Case.objects.create(**validated_data)
+    #     ceng = ac.ProfileEvalEngine(case)
+    #     data = ceng.get_profiling_preds_json()
+    #     case.data = data
+    #     case.save()
+    #     return case
+
+    def update(self, instance, validated_data):
+        serializers.ModelSerializer.update(self, instance, validated_data)
+        ceng = ac.ProfileEvalEngine(instance)
+        data = ceng.get_profiling_preds_json()
+        instance.data = data
+        instance.save()
+        return instance
 
     # def create(self, validated_data):
     #     social_media_data = validated_data.pop("social_media_data")

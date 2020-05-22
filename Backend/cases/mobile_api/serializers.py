@@ -2,7 +2,15 @@ import os
 from django.conf import settings
 from rest_framework import serializers
 
-from cases.models import Case, SocialMedia, Follower, CaseVolunteer, CaseVolunteerLocation, Feed, FacilityHistory
+from cases.models import (
+    Case,
+    SocialMedia,
+    Follower,
+    CaseVolunteer,
+    CaseVolunteerLocation,
+    Feed,
+    FacilityHistory,
+)
 from facilities.models import Facility
 from feedbacks.models import Feedback
 
@@ -150,13 +158,12 @@ class CaseVolunteerSerializer(serializers.ModelSerializer):
         model = CaseVolunteer
         fields = "__all__"
 
-    @staticmethod
-    def get_image(case_volunteer):
-        return (
-            os.path.join(settings.BASE_URL + "media/", str(case_volunteer.case.profile_photo))
-            if case_volunteer.case.profile_photo
-            else None
-        )
+    def get_image(self, case_volunteer):
+        request = self.context.get("request")
+        photo = case_volunteer.case.profile_photo
+        if photo is not None:
+            return request.build_absolute_uri(photo.url)
+        return None
 
     @staticmethod
     def get_child_name(case_volunteer):

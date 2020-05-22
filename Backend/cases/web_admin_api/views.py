@@ -11,15 +11,26 @@ from rest_framework.views import APIView
 
 from alerts.models import Alert
 from analytics.analytics_basic import IntelliSearch
-from blockchain.blockchain import changeStatus
-from cases.models import FacilityHistory, Case, Follower, CaseVolunteer, File, Feed, Child, SocialMedia
+import analytics.analytics_case as ac
+
+# from blockchain.blockchain import changeStatus
+from cases.models import (
+    FacilityHistory,
+    Case,
+    Follower,
+    CaseVolunteer,
+    File,
+    Feed,
+    Child,
+    SocialMedia,
+)
+from feedbacks.models import Feedback
+
 from cases.utils import CaseUtils
 from cases.web_admin_api.permissions import (
     FacilityCaseStatePermissions,
-    HasCaseOrganizationAdminPermissions,
-    HasCreateCasesPermissions,
+    HasOrganizationPermissions,
     HasCloseCasePermissions,
-    HasFilePermissions,
     HasArchiveCasePermissions,
 )
 from firebase.models import FCMDevice
@@ -28,10 +39,12 @@ from users.models import Uuid, User
 from users.web_admin_api.permissions import (
     HasGeneralAdminPermissions,
     HasCaseManagerPermissions,
+    HasNetworkManagerPermissions,
 )
 from .serializers import (
     # CaseSerializer,
     CasesSerializer,
+    SimilarCasesSerializer,
     CaseVolunteerSerializer,
     FileSerializer,
     FeedSerializer,
@@ -41,7 +54,24 @@ from .serializers import (
 from tzlocal import get_localzone
 
 
+class SimilarCasesList(generics.ListCreateAPIView):
+    permission_classes = (HasCaseManagerPermissions,)
+    serializer_class = SimilarCasesSerializer
+
+    def list(self, request, *args, **kwargs):
+        pk = kwargs.get("pk", None)
+        case = get_object_or_404(Case, pk=pk)
+        ceng = ac.ProfileEvalEngine(case)
+        p_json1 = ceng.get_profiling_preds_json()  # compute_probability and return json
+        similar_list = ceng.fetch_similar_closed_cases(5)  # return list of 2 similar cases ids
+        queryset = Case.objects.select_related("child").filter(id__in=similar_list)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
 class ChildrenList(APIView):
+    permission_classes = (HasCaseManagerPermissions,)
+
     def get(self, request, **kwargs):
         name = request.query_params.get("name", None)
         queryset = IntelliSearch().run_rawsql_namesearch(name, request.user.organization_id)
@@ -63,12 +93,13 @@ class ChildrenList(APIView):
 class ChildDetails(generics.RetrieveAPIView):
     queryset = Child.objects.all()
     serializer_class = ChildSerializer
+    permission_classes = (HasCaseManagerPermissions,)
 
 
 class FeedList(generics.ListCreateAPIView):
     queryset = Feed.objects.all()
     serializer_class = FeedSerializer
-    # permission_classes = (HasFilePermissions, )
+    permission_classes = (HasOrganizationPermissions, HasNetworkManagerPermissions)
 
     @staticmethod
     def send_notification(registration_ids, title, case_id):
@@ -101,20 +132,27 @@ class FeedList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         # if not request.data._mutable:
         #     request.data._mutable = True
+        report = []
         request.data["user"] = request.user.id
         request.data["case"] = kwargs.get("pk")
         case = get_object_or_404(Case, id=kwargs["pk"])
         case_volunteers = CaseVolunteer.objects.filter(case=case)
         registration_ids = []
         for case_volunteer in case_volunteers:
+            user_report = {}
             uuids = Uuid.objects.filter(user=case_volunteer.user)
             if len(uuids) <= 0:
-                return Response("Account not activated yet!", status=status.HTTP_204_NO_CONTENT)
+                # return Response("Account not activated yet!", status=status.HTTP_204_NO_CONTENT)
+                user_report["user"] = case_volunteer.user
             devices = FCMDevice.objects.filter(uuid__in=uuids)
             for device in devices:
                 registration_ids.append(device.registration_id)
             if len(registration_ids) <= 0:
-                return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT)
+                user_report["devices"] = devices
+                # return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT)
+            report.append(user_report)
+        print("Report for notifications in feed.")
+        print(report)
         title = "New post for case: {}".format(case.custom_name)
         if request.data["is_visible_to_volunteers"]:
             self.send_notification(registration_ids, title, kwargs["pk"])
@@ -128,7 +166,7 @@ class FeedList(generics.ListCreateAPIView):
 class FeedDetails(generics.UpdateAPIView):
     queryset = File.objects.all()
     serializer_class = FeedSerializer
-    # permission_classes = (HasFilePermissions, )
+    permission_classes = (HasOrganizationPermissions, HasNetworkManagerPermissions)
 
     def get_object(self, *args, **kwargs):
         return get_object_or_404(Feed, id=self.kwargs["feed_id"])
@@ -152,7 +190,7 @@ class FeedDetails(generics.UpdateAPIView):
 class FileList(generics.ListCreateAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    permission_classes = (HasFilePermissions,)
+    permission_classes = (HasOrganizationPermissions, HasGeneralAdminPermissions)
 
     def list(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
@@ -179,7 +217,7 @@ class FileList(generics.ListCreateAPIView):
 class FileDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    permission_classes = (HasFilePermissions,)
+    permission_classes = (HasOrganizationPermissions, HasGeneralAdminPermissions)
 
     def get_object(self, *args, **kwargs):
         return get_object_or_404(File, id=self.kwargs["file_id"])
@@ -215,6 +253,8 @@ class FileDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DownloadImage(APIView):
+    permission_classes = (HasOrganizationPermissions, HasGeneralAdminPermissions)
+
     def get(self, request, pk, **kwargs):
         file = get_object_or_404(File, id=kwargs.get("file_id", None))
         data = str(file.image).split(".")
@@ -227,6 +267,8 @@ class DownloadImage(APIView):
 
 
 class DownloadFile(APIView):
+    permission_classes = (HasOrganizationPermissions, HasGeneralAdminPermissions)
+
     def get(self, request, pk, **kwargs):
         file = get_object_or_404(File, id=kwargs.get("file_id", None))
         with open(os.path.join("media/", str(file.file)), "rb") as fh:
@@ -243,7 +285,7 @@ def save_case(data, serializer, owner=None):
 
 class CaseList(generics.ListCreateAPIView):
     serializer_class = CasesSerializer
-    permission_classes = (HasGeneralAdminPermissions, HasCreateCasesPermissions)
+    permission_classes = (HasOrganizationPermissions, HasCaseManagerPermissions)
 
     def get_queryset(self):
         organization_id = self.request.user.organization_id
@@ -261,7 +303,9 @@ class CaseList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        data["full_name"] = "{} {}".format(data["first_name"], data["last_name"])
+        first_name = data["first_name"] if "first_name" in data else ""
+        last_name = data["last_name"] if "last_name" in data else ""
+        data["full_name"] = "{} {}".format(first_name, last_name)
         if "child_id" in data:
             child_instance = get_object_or_404(Child, id=data["child_id"])
             child_serializer = ChildSerializer(child_instance, data=request.data, partial=True)
@@ -289,17 +333,17 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Case.objects.all()
     serializer_class = CasesSerializer
     permission_classes = (
-        HasGeneralAdminPermissions,
-        HasCaseOrganizationAdminPermissions,
+        HasCaseManagerPermissions,
+        HasOrganizationPermissions,
     )
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", True)
         instance = self.get_object()
         data = request.data
-        if "first_name" in data or "last_name" in data:
-            data["full_name"] = "{} {}".format(data["first_name"], data["last_name"])
-
+        first_name = data["first_name"] if "first_name" in data else ""
+        last_name = data["last_name"] if "last_name" in data else ""
+        data["full_name"] = "{} {}".format(first_name, last_name)
         if (
             "profile_photo" in request.data
             and request.data["profile_photo"] is not None
@@ -314,6 +358,8 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
             child_serializer.is_valid()
             self.perform_update(child_serializer)
 
+        print("AAA")
+        print(request.data)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid()
         self.perform_update(serializer)
@@ -325,7 +371,10 @@ class CaseDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class SocialMediaList(generics.ListCreateAPIView):
     serializer_class = SocialMediaSerializer
-    # permission_classes = (HasGeneralAdminPermissions, HasCreateCasesPermissions)
+    permission_classes = (
+        HasCaseManagerPermissions,
+        HasOrganizationPermissions,
+    )
 
     def get_queryset(self):
         case_id = self.request.query_params.get("case_id", None)
@@ -339,10 +388,15 @@ class SocialMediaList(generics.ListCreateAPIView):
 class SocialMediaDetails(generics.RetrieveUpdateAPIView):
     queryset = SocialMedia.objects.all()
     serializer_class = SocialMediaSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (
+        HasCaseManagerPermissions,
+        HasOrganizationPermissions,
+    )
 
 
 class AddCaseVolunteer(APIView):
+    permission_classes = (HasOrganizationPermissions, HasNetworkManagerPermissions)
+
     @staticmethod
     def send_notification(registration_ids, data):
         data_message = {
@@ -379,7 +433,7 @@ class AddCaseVolunteer(APIView):
                 for device in devices:
                     registration_ids.append(device.registration_id)
                 if len(registration_ids) <= 0:
-                    return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT)
+                    return Response("Account's firebase token not exists!", status=status.HTTP_204_NO_CONTENT,)
                 CaseVolunteer.objects.create(case=case, user=get_object_or_404(User, id=user_id))
                 title = "You have been invited to participate as a volunteer for case: {}".format(case.custom_name)
                 title += message
@@ -391,6 +445,7 @@ class AddCaseVolunteer(APIView):
 class CaseVolunteerList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = CaseVolunteerSerializer
+    permission_classes = (HasOrganizationPermissions, HasNetworkManagerPermissions)
 
     def list(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
@@ -409,7 +464,7 @@ class CaseVolunteerList(generics.ListCreateAPIView):
 class CaseVolunteerDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = CaseVolunteerSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (HasOrganizationPermissions, HasNetworkManagerPermissions)
 
     def get_object(self, *args, **kwargs):
         volunteer = get_object_or_404(CaseVolunteer, id=self.kwargs["volunteer_id"])
@@ -430,7 +485,7 @@ class CaseVolunteerDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class FacilityCaseList(generics.ListAPIView):
     serializer_class = CasesSerializer
-    permission_classes = (HasGeneralAdminPermissions, HasCreateCasesPermissions)
+    permission_classes = (HasOrganizationPermissions,)
 
     def get_queryset(self):
         cases_ids = FacilityHistory.objects.values_list("case_id", flat=True).filter(
@@ -451,11 +506,13 @@ class FacilityCaseList(generics.ListAPIView):
 
 
 class FacilityCaseDetails(CaseDetails):
-    permission_classes = (permissions.IsAuthenticated,)
+    # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (HasOrganizationPermissions,)
 
 
 class FacilityCaseState(APIView):
-    permission_classes = (HasGeneralAdminPermissions, FacilityCaseStatePermissions)
+    # permission_classes = (HasGeneralAdminPermissions, FacilityCaseStatePermissions)
+    permission_classes = (HasOrganizationPermissions,)
 
     @staticmethod
     def get(request, *args, **kwargs):
@@ -472,7 +529,7 @@ class FacilityCaseState(APIView):
 
 
 class FacilityCaseReportMissing(APIView):
-    permission_classes = (HasGeneralAdminPermissions,)
+    permission_classes = (HasOrganizationPermissions,)
 
     @staticmethod
     def get(request, *args, **kwargs):
@@ -490,7 +547,7 @@ class FacilityCaseReportMissing(APIView):
 class CloseCase(APIView):
     permission_classes = (
         HasCaseManagerPermissions,
-        HasCaseOrganizationAdminPermissions,
+        HasOrganizationPermissions,
         HasCloseCasePermissions,
     )
 
@@ -522,28 +579,45 @@ class CloseCase(APIView):
             print(exception)
 
     # @staticmethod
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        import dateutil.parser
+
         case_id = kwargs.pop("pk", None)
         local_now = datetime.datetime.now(get_localzone())
+
+        first_feedback_date = Feedback.objects.filter(case=case_id).first().date
+        print("OKOKOKOK")
+        print(first_feedback_date)
+        # first_feedback_date = datetime.datetime.fromisoformat(str(first_feedback_date))
+        first_feedback_date = dateutil.parser.isoparse(str(first_feedback_date))
+        last_feedback_date = Feedback.objects.filter(case=case_id).last().date
+        # last_feedback_date = datetime.datetime.fromisoformat(str(last_feedback_date))
+        last_feedback_date = dateutil.parser.isoparse(str(last_feedback_date))
+        diff = last_feedback_date - first_feedback_date
+        hours_diff = divmod(diff.seconds, 3600)[0]
+        days = hours_diff / 24
+
         case = Case.objects.get(pk=case_id)
         if case.status == "active":
             Alert.objects.filter(case_id=case_id, is_active=True).update(is_active=False)
             case.status = "closed"
             case.end_date = local_now
+            case.days_diff = days
             case.save()
             self.send_notification(case)
         followers = Follower.objects.filter(case=case_id)
         for follower in followers:
             follower.is_active = False
             follower.save()
-        changeStatus(case.blockchain_address, case.status)
+        # blockchain_integration
+        # changeStatus(case.blockchain_address, case.status)
         return Response("Case {} closed".format(case_id), status=status.HTTP_200_OK)
 
 
 class ArchiveCase(APIView):
     permission_classes = (
         HasCaseManagerPermissions,
-        HasCaseOrganizationAdminPermissions,
+        HasOrganizationPermissions,
         HasArchiveCasePermissions,
     )
 

@@ -11,9 +11,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="case", name="blockchain_address", field=models.CharField(blank=True, max_length=256, null=True),
+            model_name="case",
+            name="blockchain_address",
+            field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.AlterField(
-            model_name="case", name="languages_spoken", field=models.CharField(blank=True, max_length=250, null=True),
+            model_name="case",
+            name="languages_spoken",
+            field=models.CharField(blank=True, max_length=250, null=True),
         ),
     ]

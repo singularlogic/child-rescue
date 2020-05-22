@@ -10,5 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="feedback", name="score", field=models.FloatField(default=0.0),),
+        migrations.AddField(
+            model_name="feedback", name="score", field=models.FloatField(default=0.0),
+        ),
     ]

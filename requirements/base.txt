@@ -33,12 +33,15 @@ Unidecode==1.0.22
 urllib3==1.23
 toolz==0.10.0
 
-pandas
-sklearn
-geopy
-tweepy
-eventful
-foursquare
+pandas==1.0.3
+scikit-learn==0.22.2.post1
+geopy==1.21.0
+tweepy==3.8.0
+eventful==0.3
+foursquare==1!2020.1.30
 
 web3==5.4.0
 pysha3==1.0.2
+
+pyowm==2.10.0
+googlemaps==4.2.0

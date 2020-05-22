@@ -58,4 +58,4 @@ class Organization(models.Model):
         return "ID: {}".format(self.id)
 
     def profile_image_element(self):
-        return mark_safe('<img src="http://localhost:8000/media/%s" width="16" height="16" />' % self.logo)
+        return mark_safe('<img src="https://localhost:8000/media/%s" width="16" height="16" />' % self.logo)

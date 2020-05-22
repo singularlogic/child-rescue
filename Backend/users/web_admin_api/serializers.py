@@ -149,5 +149,5 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
 class PasswordResetSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
-    uid = serializers.CharField(write_only=True)
     token = serializers.CharField(write_only=True)
+    uid = serializers.CharField(write_only=True)

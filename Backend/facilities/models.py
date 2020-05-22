@@ -25,7 +25,10 @@ class FacilitySet(models.QuerySet):
         case.arrival_at_facility_date = date_entered
         case.save()
         FacilityHistory.objects.create(
-            facility=Facility.objects.get(pk=facility_id), case=case, date_entered=date_entered, is_active=True,
+            facility=Facility.objects.get(pk=facility_id),
+            case=case,
+            date_entered=date_entered,
+            is_active=True,
         )
 
     @staticmethod
@@ -73,4 +76,6 @@ class Facility(models.Model):
         return self.name
 
     def get_full_address(self):
-        return self.address + " " + self.city + " " + self.postal_code + " " + self.country
+        return (
+            self.address + " " + self.city + " " + self.postal_code + " " + self.country
+        )

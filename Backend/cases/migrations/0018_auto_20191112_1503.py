@@ -13,11 +13,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(name="casevolunteer", options={"verbose_name_plural": "case_volunteers"},),
         migrations.AlterModelOptions(
-            name="casevolunteerlocation", options={"verbose_name_plural": "case_volunteer_locations"},
+            name="casevolunteer", options={"verbose_name_plural": "case_volunteers"},
         ),
-        migrations.AlterModelOptions(name="follower", options={"verbose_name_plural": "case_followers"},),
+        migrations.AlterModelOptions(
+            name="casevolunteerlocation",
+            options={"verbose_name_plural": "case_volunteer_locations"},
+        ),
+        migrations.AlterModelOptions(
+            name="follower", options={"verbose_name_plural": "case_followers"},
+        ),
         migrations.AddField(
             model_name="case",
             name="owner",

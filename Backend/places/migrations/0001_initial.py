@@ -19,8 +19,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Place",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("description", models.CharField(blank=True, max_length=4096, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=4096, null=True),
+                ),
                 (
                     "tag",
                     models.CharField(
@@ -58,17 +69,28 @@ class Migration(migrations.Migration):
                 ("radius", models.FloatField(default=5.0)),
                 ("evaluation", models.FloatField(default=0.0)),
                 ("is_searched", models.BooleanField(default=False)),
-                ("case", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="cases.Case")),
+                (
+                    "case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="cases.Case"
+                    ),
+                ),
                 (
                     "feedback",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="feedbacks.Feedback"
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="feedbacks.Feedback",
                     ),
                 ),
                 (
                     "user",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],

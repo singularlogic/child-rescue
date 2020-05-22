@@ -10,11 +10,13 @@ from users.mobile_api.views import (
     ForgotPassword,
     PasswordReset,
     UuidActivityCreate,
+    DeleteAccount,
 )
 
 urlpatterns = [
     path("register/", UserCreate.as_view(), name="register"),
     path("login/", UserLogin.as_view(), name="login"),
+    path("delete-account/", DeleteAccount.as_view(), name="delete-account"),
     path("logout/", UserLogout.as_view(), name="logout"),
     path("me/", UserDetail.as_view(), name="me"),
     path("<int:pk>/", UserDetail.as_view(), name="user_details"),

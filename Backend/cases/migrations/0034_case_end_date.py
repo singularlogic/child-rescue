@@ -10,5 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="case", name="end_date", field=models.DateField(blank=True, null=True),),
+        migrations.AddField(
+            model_name="case",
+            name="end_date",
+            field=models.DateField(blank=True, null=True),
+        ),
     ]

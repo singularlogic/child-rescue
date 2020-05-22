@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="casevolunteer", name="has_accept_invitation", field=models.NullBooleanField(default=None),
+            model_name="casevolunteer",
+            name="has_accept_invitation",
+            field=models.NullBooleanField(default=None),
         ),
     ]

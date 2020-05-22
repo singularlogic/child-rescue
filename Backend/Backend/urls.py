@@ -23,7 +23,10 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("auth/", include("rest_framework_social_oauth2.urls")),
     path("api/v1/users/", include("users.urls", namespace="users_v1")),
-    path("api/v1/organizations/", include("organizations.urls", namespace="organizations_v1")),
+    path(
+        "api/v1/organizations/",
+        include("organizations.urls", namespace="organizations_v1"),
+    ),
     path("api/v1/cases/", include("cases.urls", namespace="cases_v1")),
     path("api/v1/alerts/", include("alerts.urls", namespace="alerts_v1")),
     path("api/v1/feedbacks/", include("feedbacks.urls", namespace="feedbacks_v1")),

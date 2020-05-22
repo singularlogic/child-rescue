@@ -10,5 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="user", name="is_team_leader", field=models.NullBooleanField(default=False),),
+        migrations.AddField(
+            model_name="user",
+            name="is_team_leader",
+            field=models.NullBooleanField(default=False),
+        ),
     ]

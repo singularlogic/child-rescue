@@ -10,6 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(model_name="user", name="latitude", field=models.FloatField(blank=True, null=True),),
-        migrations.AddField(model_name="user", name="longitude", field=models.FloatField(blank=True, null=True),),
+        migrations.AddField(
+            model_name="user",
+            name="latitude",
+            field=models.FloatField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="user",
+            name="longitude",
+            field=models.FloatField(blank=True, null=True),
+        ),
     ]

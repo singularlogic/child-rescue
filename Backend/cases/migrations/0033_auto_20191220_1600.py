@@ -14,14 +14,20 @@ class Migration(migrations.Migration):
             model_name="case",
             name="clothing_with_scent",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=20, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=20,
+                null=True,
             ),
         ),
         migrations.AlterField(
             model_name="case",
             name="has_area_knowledge",
             field=models.CharField(
-                blank=True, choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")], max_length=20, null=True
+                blank=True,
+                choices=[("yes", "Yes"), ("no", "No"), (None, "Unknown")],
+                max_length=20,
+                null=True,
             ),
         ),
         migrations.AlterField(

@@ -15,6 +15,7 @@ class CaseUtils(object):
         ("present", "Present"),
         ("not_present", "Not present"),
         ("transit", "Transit"),
+        ("missing", "Missing"),
     )
     CASE_STATUS_CHOICES = (
         ("inactive", "Inactive"),
@@ -89,10 +90,12 @@ class CaseUtils(object):
         (None, "Unknown"),
     )
     CONCERN_CHOICES = (
+        ("neglect", "Neglect"),
+        ("parent_relation", "Relation with the parents"),
         ("parent_separation", "Recent separation of parents"),
         ("on_migration", "On Migration"),
         ("parents_in_dispute", "Parents in dispute (at court or otherwise)"),
-        ("physical_sexual_abuse", "Physical or Sexual abuse"),
+        ("physical_sexual_abuse", "Domestic violence/Sexual abuse"),
         ("death_of_family_member", "Recent death of family member/friend"),
         ("possibly", "Possibly"),
         ("none", "None"),
@@ -100,15 +103,16 @@ class CaseUtils(object):
     )
     DISAPPEARANCE_REASON_CHOICES = (
         ("family_issues", "Family Issues"),
-        ("personal_issues", "Personal Issues"),
+        ("personal_issues", "Personal Issues/Bullying"),
         ("love_affair", "Love affair"),
         ("health_issues", "Health issues"),
         ("mass_disaster", "Mass disaster"),
-        ("migration", "Migration"),
+        ("migration", "Migration/In search for relatives"),
         ("other", "Other"),
         (None, "Unknown"),
     )
     DISORDERS_CHOICES = (
+        ("possibly", "Possibly"),
         ("mild", "Mild"),
         ("moderate", "Moderate"),
         ("severe", "Severe, self-threatening"),
@@ -116,12 +120,14 @@ class CaseUtils(object):
         (None, "Unknown"),
     )
     LIVING_ENVIRONMENT_CHOICES = (
-        ("single_bio_parent", "Living with 1 biological parent"),
+        ("divorced_parents", "Divorced parents"),
+        ("single_bio_parent", "Single parent family"),
         ("both_bio_parents", "Living with both biological parents"),
-        ("bio_step_parents", "Living with 1 biological parent + 1 step-parent"),
+        ("bio_step_parents", "Mixed (biological and step parents)"),
+        ("camp", "Living in open accommodation facility (e.g. camp)"),
         ("facility", "Living in camp/hosting facility"),
-        ("relatives", "Living under relatives' care/foster family"),
-        ("institution", "Living in institution /psychiatric facility"),
+        ("relatives", "Living with relatives/foster family"),
+        ("institution", "Living in closed institution / hosting facility"),
         ("transit", "In transit"),
         (None, "Unknown"),
     )
@@ -133,6 +139,7 @@ class CaseUtils(object):
         (None, "Unknown"),
     )
     SCHOOL_GRADES_CHOICES = (
+        ("not_attending", "Not Attending School"),
         ("excellent", "Excellent"),
         ("good", "Good"),
         ("average", "Sufficient"),
@@ -145,16 +152,13 @@ class CaseUtils(object):
         ("in_relationship", "In a relationship"),
         ("complicated", "It's complicated"),
         ("broke_up", "Recently broke up"),
-        ("other", "Other"),
-        (None, "Unknown"),
+        (None, "Other/Unknown"),
     )
     LEGAL_STATUS_CHOICES = (
         ("illegal", "No papers/Illegal"),
-        ("temp_papers", "Temporal papers"),
-        ("asylum_granted", "Asylum granted"),
-        ("asylum_applied", "Asylum applied"),
-        ("legal", "Legal"),
-        (None, "Unknown"),
+        ("asylum_applied", "Asylum Seeker/Applicant"),
+        ("legal", "Legal/Asylum granted"),
+        (None, "Other/Unknown"),
     )
     FOLLOWERS_CHOICES = (
         ("low", "Low < 50"),

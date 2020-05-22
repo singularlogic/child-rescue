@@ -10,7 +10,12 @@ class HasPlacePermissions(permissions.BasePermission):
 
     def has_permission(self, request, view):
         def _check_permissions(_user, _case):
-            _has_proper_role = _user.role in ["organization_manager", "coordinator", "case_manager", "network_manager"]
+            _has_proper_role = _user.role in [
+                "organization_manager",
+                "coordinator",
+                "case_manager",
+                "network_manager",
+            ]
             _belongs_to_organization = _case.organization == _user.organization
             if _has_proper_role and _belongs_to_organization:
                 return True

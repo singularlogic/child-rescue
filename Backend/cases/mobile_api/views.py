@@ -53,13 +53,17 @@ class FollowCase(APIView):
 
     def post(self, request, pk):
         case = self.get_object(pk)
-        followed_case, created = Follower.objects.get_or_create(case=case, user=request.user)
+        followed_case, created = Follower.objects.get_or_create(
+            case=case, user=request.user
+        )
 
         if created or not followed_case.is_active:
             followed_case.is_active = True
             followed_case.save()
 
-        return Response(self.serializer_class(followed_case).data, status=status.HTTP_200_OK)
+        return Response(
+            self.serializer_class(followed_case).data, status=status.HTTP_200_OK
+        )
 
 
 class UnfollowCase(APIView):
@@ -81,7 +85,9 @@ class UnfollowCase(APIView):
             followed_case.is_active = False
             followed_case.save()
 
-        return Response(self.serializer_class(followed_case).data, status=status.HTTP_200_OK)
+        return Response(
+            self.serializer_class(followed_case).data, status=status.HTTP_200_OK
+        )
 
 
 class VolunteerCasesList(generics.ListAPIView):
@@ -95,7 +101,9 @@ class VolunteerCasesList(generics.ListAPIView):
             queryset = CaseVolunteer.objects.filter(user=request.user)
         else:
             queryset = CaseVolunteer.objects.filter(
-                user=request.user, has_accept_invitation=has_accept_invitation, case__status="active"
+                user=request.user,
+                has_accept_invitation=has_accept_invitation,
+                case__status="active",
             )
 
         page = self.paginate_queryset(queryset)
@@ -112,10 +120,14 @@ class AcceptInvite(APIView):
     permission_classes = (permissions.IsAuthenticated, HasVolunteerPermissions)
 
     def post(self, request, **kwargs):
-        case_volunteer = get_object_or_404(CaseVolunteer, case=kwargs.get("pk", None), user=request.user)
+        case_volunteer = get_object_or_404(
+            CaseVolunteer, case=kwargs.get("pk", None), user=request.user
+        )
         case_volunteer.has_accept_invitation = True
         case_volunteer.save()
-        return Response(self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK)
+        return Response(
+            self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK
+        )
 
 
 class DeclineInvite(APIView):
@@ -123,10 +135,14 @@ class DeclineInvite(APIView):
     permission_classes = (permissions.IsAuthenticated, HasVolunteerPermissions)
 
     def post(self, request, **kwargs):
-        case_volunteer = get_object_or_404(CaseVolunteer, case=kwargs.get("pk", None), user=request.user)
+        case_volunteer = get_object_or_404(
+            CaseVolunteer, case=kwargs.get("pk", None), user=request.user
+        )
         case_volunteer.has_accept_invitation = False
         case_volunteer.save()
-        return Response(self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK)
+        return Response(
+            self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK
+        )
 
 
 class VolunteerCasesLocation(generics.CreateAPIView):
@@ -136,23 +152,24 @@ class VolunteerCasesLocation(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         case_id = self.kwargs.get("pk", None)
-        case_volunteer = get_object_or_404(CaseVolunteer, user=self.request.user, case=case_id)
+        case_volunteer = get_object_or_404(
+            CaseVolunteer, user=self.request.user, case=case_id
+        )
         self.request.data["case_volunteer"] = case_volunteer.id
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 class MyFeedList(generics.ListCreateAPIView):
     queryset = Feed.objects.all()
     serializer_class = FeedSerializer
-    permission_classes = (
-        permissions.IsAuthenticated,
-        HasVolunteerPermissions,
-    )
+    permission_classes = (permissions.IsAuthenticated, HasVolunteerPermissions)
 
     def list(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
@@ -169,10 +186,7 @@ class MyFeedList(generics.ListCreateAPIView):
 class FeedList(generics.ListCreateAPIView):
     queryset = Feed.objects.all()
     serializer_class = FeedSerializer
-    permission_classes = (
-        permissions.IsAuthenticated,
-        HasVolunteerPermissions,
-    )
+    permission_classes = (permissions.IsAuthenticated, HasVolunteerPermissions)
 
     def list(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)
@@ -194,17 +208,16 @@ class FeedList(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 class VolunteerList(generics.ListCreateAPIView):
     queryset = CaseVolunteer.objects.all()
 
     serializer_class = CaseVolunteerSerializer
-    permission_classes = (
-        permissions.IsAuthenticated,
-        HasVolunteerPermissions,
-    )
+    permission_classes = (permissions.IsAuthenticated, HasVolunteerPermissions)
 
     def list(self, request, *args, **kwargs):
         pk = kwargs.get("pk", None)

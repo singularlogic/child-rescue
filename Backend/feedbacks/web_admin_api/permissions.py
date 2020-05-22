@@ -9,61 +9,23 @@ class HasFeedbackOrganizationAdminPermissions(permissions.BasePermission):
     message = "Permission denied!"
 
     def has_permission(self, request, view):
-        if request.user.role != "admin":
-            feedback = Feedback.objects.get(pk=view.kwargs["pk"])
-            if request.user.organization_id is None or str(
-                request.user.organization_id
-            ) != str(feedback.organization):
+        """Works for every method."""
+        organization = None
+        if "pk" in view.kwargs:
+            feedback = get_object_or_404(Feedback, id=view.kwargs["pk"])
+            organization = feedback.organization
+        if "caseId" in request.query_params:
+            case = get_object_or_404(Case, id=request.query_params["caseId"])
+            organization = case.organization
+        if "case" in request.data:
+            case = get_object_or_404(Case, id=request.data["case"])
+            organization = case.organization
+        if organization is not None:
+            if (
+                request.user.organization_id is not None
+                and request.user.organization_id != organization.id
+            ):
                 self.message = "User belong to different organization than the fact!"
                 return False
-        return True
-
-
-class HasGetFeedbackPermissions(permissions.BasePermission):
-    message = "Permission denied!"
-
-    def has_permission(self, request, view):
-        is_super_admin = request.user.organization_id is None
-        if request.method == "GET":
-            if not is_super_admin:
-                case_id = request.query_params.get("caseId", None)
-                if case_id is not None:
-                    is_case_in_same_organization = (
-                        get_object_or_404(Case, pk=case_id).organization.id
-                        == request.user.organization_id
-                    )
-                    if not is_case_in_same_organization:
-                        self.message = (
-                            "Case belong to different organization than the user!"
-                        )
-                        return False
-        return True
-
-
-class HasCreateFeedbackPermissions(permissions.BasePermission):
-    message = "Permission denied!"
-
-    def has_permission(self, request, view):
-        if request.method == "POST":
-            case_id = request.data["case"] if "case" in request.data else None
-            if case_id is None:
-                self.message = "You must provide a case id!"
-                return False
-            if (
-                Case.objects.get(id=case_id).organization.id
-                != request.user.organization_id
-            ):
-                self.message = "Case belong to different organization than the user!"
-                return False
-        return True
-
-
-class HasUpdateDeleteFeedbackPermissions(permissions.BasePermission):
-    message = "Permission denied!"
-
-    def has_permission(self, request, view):
-        if request.method in ["PUT", "DELETE"]:
-            if request.user.role == "facility_manager":
-                self.message = "Facility manager cannot update or delete facts!"
-                return False
-        return True
+            return True
+        return request.user.organization_id is not None
