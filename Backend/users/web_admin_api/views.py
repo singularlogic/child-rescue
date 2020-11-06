@@ -196,7 +196,8 @@ class ForgotPassword(APIView):
                 "token": default_token_generator.make_token(user),
             }
             email_template_name = "users/reset_password.html"
-            subject = "Child Rescue Reset Password"
+            prefix = settings.SERVER.upper() + " " if settings.SERVER != 'production' else ""
+            subject = "{}Child Rescue Reset Password".format(prefix)
             # email = loader.render_to_string(email_template_name, params)
             html_content = loader.get_template(email_template_name).render(params)
             send_mail(
@@ -208,7 +209,7 @@ class ForgotPassword(APIView):
                 html_message=html_content,
             )
             return Response("success", status=status.HTTP_200_OK)
-        return Response("not_foud", status=status.HTTP_404_NOT_FOUND)
+        return Response("not_found", status=status.HTTP_404_NOT_FOUND)
 
 
 class PasswordReset(APIView):
@@ -238,10 +239,7 @@ class ChangePassword(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, format=None):
-        print(request.data)
         old_password = request.data["oldPassword"]
-        print(old_password)
-
         user = self.request.user
         if user is not None:
             if user.check_password(old_password):

@@ -19,6 +19,7 @@ urlpatterns = [
     path("<int:pk>/my-feed/", MyFeedList.as_view(), name="feed_list"),
     path("<int:pk>/volunteers/", VolunteerList.as_view(), name="volunteer_list"),
     path("followed-cases/", FollowedCases.as_view(), name="followed_cases"),
+    path("closed-followed-cases/", ClosedFollowedCases.as_view(), name="closed_followed_cases"),
     path("<int:pk>/follow/", FollowCase.as_view(), name="follow"),
     path("<int:pk>/unfollow/", UnfollowCase.as_view(), name="unfollow"),
 ]

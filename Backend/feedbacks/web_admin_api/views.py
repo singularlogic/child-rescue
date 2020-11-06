@@ -23,9 +23,7 @@ class LatestFeedbackList(generics.ListAPIView):
     permission_classes = (HasGeneralAdminPermissions,)
 
     def get_queryset(self):
-        return Feedback.objects.get_latest_web_queryset(
-            self.request.user.organization_id
-        )
+        return Feedback.objects.get_latest_web_queryset(self.request.user.organization_id)
 
 
 class FeedbackList(generics.ListCreateAPIView):
@@ -41,9 +39,7 @@ class FeedbackList(generics.ListCreateAPIView):
         is_superuser = organization_id is None
         if is_superuser:
             organization_id = self.request.query_params.get("organization_id", None)
-        return Feedback.objects.get_web_query_set(
-            organization_id, case_id, is_superuser
-        )
+        return Feedback.objects.get_web_query_set(organization_id, case_id, is_superuser)
 
     def perform_create(self, serializer):
         organization = Organization.objects.get(id=self.request.user.organization_id)
@@ -61,9 +57,7 @@ class FeedbackList(generics.ListCreateAPIView):
             )
         else:
             serializer.save(
-                case=Case.objects.get(id=case_id),
-                user=self.request.user,
-                organization=organization,
+                case=Case.objects.get(id=case_id), user=self.request.user, organization=organization,
             )
 
 
@@ -97,14 +91,17 @@ class FeedbackDetails(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         instance = self.get_object()
-        if instance.user.role in ["volunteer", "simple_user"] and (
-            self.request.data["feedback_status"] == "spam"
-            or self.request.data["is_valid"] is not None
+        if (
+            instance.user
+            and instance.user.role
+            and instance.user.role in ["volunteer", "simple_user"]
+            and (self.request.data["feedback_status"] == "spam" or self.request.data["is_valid"] is not None)
         ):
             r = UserRanking(instance.user)
             fr = r.get_new_user_rank()
             instance.user.ranking = fr
             instance.user.save()
+
         if (
             instance.feedback_status is None
             or (instance.feedback_status == "pending")

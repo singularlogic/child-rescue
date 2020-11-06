@@ -81,7 +81,7 @@ class HasCaseManagerPermissions(permissions.BasePermission):
     message = "Permission denied!"
 
     def has_permission(self, request, view):
-        if request.user.role is None:
+        if request.user and request.user.role is None:
             return False
         is_manager = request.user.role in [
             "organization_manager",

@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from rest_framework import serializers
 
+from alerts.models import Alert
 from cases.models import (
     Case,
     SocialMedia,
@@ -46,6 +47,7 @@ class CaseSerializer(serializers.ModelSerializer):
     disappearance_date = serializers.SerializerMethodField(read_only=True)
     disappearance_location = serializers.SerializerMethodField(read_only=True)
     arrival_date = serializers.SerializerMethodField()
+    last_alert_message = serializers.SerializerMethodField()
 
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
@@ -70,6 +72,16 @@ class CaseSerializer(serializers.ModelSerializer):
             return current_facility.facility.id
         except FacilityHistory.DoesNotExist:
             return None
+
+    def get_last_alert_message(self, case):
+        try:
+            last_alert = Alert.objects.filter(case=case).last()
+            if last_alert is not None:
+                return last_alert.description
+            return ""
+        except Exception as exception:
+            print(exception)
+            return ""
 
     def get_current_facility(self, case):
         try:
@@ -161,7 +173,7 @@ class CaseVolunteerSerializer(serializers.ModelSerializer):
     def get_image(self, case_volunteer):
         request = self.context.get("request")
         photo = case_volunteer.case.profile_photo
-        if photo is not None:
+        if photo and photo is not None:
             return request.build_absolute_uri(photo.url)
         return None
 

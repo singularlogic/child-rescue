@@ -38,8 +38,6 @@ class FeedbackList(generics.ListCreateAPIView):
                 if user_feedback["feedback_image"] is not None
                 else None
             )
-            print("YOOO")
-            print(user_feedback)
 
             user_feedback["profile_photo"] = (
                 request.build_absolute_uri(user_feedback["profile_photo"])
@@ -55,8 +53,8 @@ class FeedbackList(generics.ListCreateAPIView):
         if request.user.is_anonymous:
             request.data["source"] = "Anonymous"
         else:
-            request.data["source"] = "{} {}".format(self.request.user.first_name, self.request.user.last_name)
-            # request.data["source"] = self.request.user.email
+            # request.data["source"] = "{} {}".format(self.request.user.first_name, self.request.user.last_name)
+            request.data["source"] = self.request.user.email
             request.data["user"] = request.user.id
 
         if "current_latitude" not in request.data or "current_longitude" not in request.data:
@@ -90,7 +88,6 @@ class FeedbackList(generics.ListCreateAPIView):
         #     source=str(feedback.source),
         #     feedback_image=str(feedback.feedback_image),
         # )
-        print("FEEDBACK CREATED")
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

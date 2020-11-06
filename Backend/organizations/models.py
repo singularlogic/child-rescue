@@ -38,6 +38,7 @@ class Organization(models.Model):
     email = models.CharField(max_length=256, blank=True, null=True)
     address = models.CharField(max_length=256, blank=True, null=True)
     phone = models.CharField(max_length=14, blank=True, null=True)
+    country = models.CharField(max_length=256, blank=True, null=True)
     facebook = models.CharField(max_length=128, blank=True, null=True)
     instagram = models.CharField(max_length=128, blank=True, null=True)
     twitter = models.CharField(max_length=128, blank=True, null=True)

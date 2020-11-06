@@ -1,0 +1,50 @@
+version: '3.5'
+
+services:
+
+  postgres:
+    image: kartoza/postgis:11.0-2.5
+    container_name: cr_postgres
+    volumes:
+      - postgres:/var/lib/postgresql
+    env_file: ./.envs/.local/.postgres.env
+    ports:
+      - 5432:5432
+    networks:
+      - cr
+    restart: on-failure
+
+  django:
+    image: suite5/cr-backend:0.1.0
+    container_name: cr_backend
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: compose/local/Dockerfile
+    volumes:
+      - backend:/app
+    env_file:
+        - ./.envs/.local/.django.env
+        - ./.envs/.local/.postgres.env
+    ports:
+      - 8000:8000
+    networks:
+      - cr
+    command: /start
+    restart: on-failure
+
+networks:
+  cr:
+
+volumes:
+  postgres:
+    name: cr_postgres
+  backend:
+    name: cr_backend
+    driver: local
+    driver_opts:
+      type: none
+      #device: $PWD/backend
+      device: $MOUNT_PATH
+      o: bind

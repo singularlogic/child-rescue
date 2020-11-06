@@ -1,8 +1,11 @@
+from datetime import datetime
+
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from tzlocal import get_localzone
 
 from cases.mobile_api.permissions import HasVolunteerPermissions
 from cases.models import Case, Follower, CaseVolunteer, CaseVolunteerLocation, Feed
@@ -19,6 +22,9 @@ class CaseList(generics.ListAPIView):
     queryset = Case.objects.all()
     serializer_class = CaseSerializer
     # permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return Case.objects.filter(status="active")
 
 
 class CaseDetails(generics.RetrieveAPIView):
@@ -38,6 +44,22 @@ class FollowedCases(generics.ListAPIView):
             if item.is_active:
                 followed_cases.append(Case.objects.get(id=item.case.id))
         return followed_cases
+
+
+class ClosedFollowedCases(generics.ListAPIView):
+    serializer_class = CaseSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        local_now = datetime.now(get_localzone())
+        print(local_now)
+        followed_cases_records = Follower.objects.filter(user=self.request.user.id)
+        closed_followed_cases = []
+        for item in followed_cases_records:
+            if item.is_active and item.case.end_date is not None:
+                if abs((item.case.end_date - local_now).days) <= 2:
+                    closed_followed_cases.append(Case.objects.get(id=item.case.id))
+        return closed_followed_cases
 
 
 class FollowCase(APIView):
@@ -125,9 +147,7 @@ class AcceptInvite(APIView):
         )
         case_volunteer.has_accept_invitation = True
         case_volunteer.save()
-        return Response(
-            self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK
-        )
+        return Response(status=status.HTTP_200_OK)  # self.serializer_class(case_volunteer).data
 
 
 class DeclineInvite(APIView):
@@ -141,8 +161,8 @@ class DeclineInvite(APIView):
         case_volunteer.has_accept_invitation = False
         case_volunteer.save()
         return Response(
-            self.serializer_class(case_volunteer).data, status=status.HTTP_200_OK
-        )
+            status=status.HTTP_200_OK
+        )  # self.serializer_class(case_volunteer).data,
 
 
 class VolunteerCasesLocation(generics.CreateAPIView):

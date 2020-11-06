@@ -1,6 +1,31 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
-from cases.models import Case, Child
+from cases.models import Case, Child, SharedCase, File
+
+
+class HasFilesOrganizationPermissions(permissions.BasePermission):
+    message = "Permission denied!"
+
+    def has_permission(self, request, view):
+        if "pk" in view.kwargs:
+            case = get_object_or_404(Case, id=view.kwargs["pk"])
+            if request.method != "DELETE":
+                shared_case = SharedCase.objects.filter(case=case).first()
+                is_shared_case = False
+                if shared_case is not None:
+                    is_shared_case = request.user.organization_id == shared_case.organization.id
+                if (
+                    request.user.organization_id is not None
+                    and (request.user.organization_id != case.organization_id and not is_shared_case)
+                ):
+                    self.message = "User does not belong to case organisation!"
+                    return False
+            else:
+                file = get_object_or_404(File, id=view.kwargs["file_id"])
+                if file.user != request.user:
+                    self.message = "File does not belong to the user!"
+                    return False
+        return True
 
 
 class HasOrganizationPermissions(permissions.BasePermission):
@@ -9,12 +34,25 @@ class HasOrganizationPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         if "pk" in view.kwargs:
             case = get_object_or_404(Case, id=view.kwargs["pk"])
-            if (
-                request.user.organization_id is not None
-                and request.user.organization_id != case.organization_id
-            ):
-                self.message = "User does not belong to case organisation!"
-                return False
+            if request.method == "GET":
+                shared_case = SharedCase.objects.filter(case=case).first()
+                is_shared_case = False
+                if shared_case is not None:
+                    is_shared_case = request.user.organization_id == shared_case.organization.id
+                if (
+                    request.user.organization_id is not None
+                    and (request.user.organization_id != case.organization_id and not is_shared_case)
+                ):
+                    self.message = "User does not belong to case organisation!"
+                    return False
+            else:
+                if (
+                    request.user.organization_id is not None
+                    and request.user.organization_id != case.organization_id
+                ):
+                    self.message = "User does not belong to case organisation!"
+                    return False
+
         return True
 
 

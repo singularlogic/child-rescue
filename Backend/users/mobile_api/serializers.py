@@ -13,6 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data["last_name"],
             is_end_user=validated_data["is_end_user"],
             phone=validated_data["phone"] if "phone" in validated_data else None,
+            address=validated_data["address"] if "address" in validated_data else None,
+            date_of_birth=validated_data["date_of_birth"] if "date_of_birth" in validated_data else None,
             role="simple_user",
             is_active=True,
         )
@@ -28,6 +30,9 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "first_name",
             "last_name",
+            "phone",
+            "address",
+            "date_of_birth",
             "profile_image",
             "is_end_user",
         )

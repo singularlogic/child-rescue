@@ -1,10 +1,13 @@
+import requests
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from cases.models import Case
 from firebase.pyfcm.fcm import FCMNotification
 
 from alerts.models import Alert
@@ -13,6 +16,7 @@ from organizations.models import Organization
 
 from analytics.web_admin_api.serializers import CountSerializer, AreaSerializer
 from alerts.web_admin_api.serializers import AlertSerializer
+from users.models import User
 
 from users.web_admin_api.permissions import (
     HasCaseManagerPermissions,
@@ -37,7 +41,47 @@ class AlertList(generics.ListCreateAPIView):
     )
 
     @staticmethod
-    def send_notification(data):
+    def send_notification(data, country):
+        data_message = {
+            "type": "alert_notification",
+            "title": data["custom_name"],
+            "description": data["description"],
+            "latitude": data["latitude"],
+            "longitude": data["longitude"],
+            "radius": data["radius"],
+            "country": country
+        }
+        push_service = FCMNotification(api_key=settings.FIREBASE_API_KEY)
+        devices = FCMDevice.objects.all()
+        android_registration_ids = []
+        ios_registration_gr_ids = []
+        ios_registration_be_ids = []
+        for device in devices:
+            if device is not None and device.active is True:
+                if device.type == "ios_gr":
+                    ios_registration_gr_ids.append(device.registration_id)
+                if device.type == "ios_be":
+                    ios_registration_be_ids.append(device.registration_id)
+                else:
+                    android_registration_ids.append(device.registration_id)
+        try:
+            url = "https://us-central1-childrescue-f8c82.cloudfunctions.net/setIosNotification"
+            login_request = requests.post(url, data=data_message)
+            response = login_request.json()
+            push_service.notify_multiple_devices(
+                registration_ids=android_registration_ids,
+                # message_title=title,
+                # message_body=description,
+                data_message=data_message,
+                android_channel_id="cr",
+                # sound='Default',
+                # badge=1
+            )
+        except Exception as exception:
+            print(exception)
+
+    @staticmethod
+    def send_notification_to_volunteers(data, org_id):
         data_message = {
             "type": "alert_notification",
             "title": data["custom_name"],
@@ -47,14 +91,25 @@ class AlertList(generics.ListCreateAPIView):
             "radius": data["radius"],
         }
         push_service = FCMNotification(api_key=settings.FIREBASE_API_KEY)
-        devices = FCMDevice.objects.all()
-        registration_ids = []
+        volunteers = User.objects.values_list('uuid', flat=True).filter(organization=org_id, role="volunteer")
+        devices = FCMDevice.objects.filter(uuid__in=volunteers)
+        android_registration_ids = []
+        ios_registration_gr_ids = []
+        ios_registration_be_ids = []
         for device in devices:
             if device is not None and device.active is True:
-                registration_ids.append(device.registration_id)
+                if device.type == "ios_gr":
+                    ios_registration_gr_ids.append(device.registration_id)
+                if device.type == "ios_be":
+                    ios_registration_be_ids.append(device.registration_id)
+                else:
+                    android_registration_ids.append(device.registration_id)
         try:
+            url = "https://us-central1-childrescue-f8c82.cloudfunctions.net/setIosNotification"
+            login_request = requests.post(url, data=data_message)
+            response = login_request.json()
             push_service.notify_multiple_devices(
-                registration_ids=registration_ids,
+                registration_ids=android_registration_ids,
                 # message_title=title,
                 # message_body=description,
                 data_message=data_message,
@@ -69,17 +124,41 @@ class AlertList(generics.ListCreateAPIView):
         organization_id = self.request.user.organization_id
         case_id = self.request.query_params.get("caseId", None)
         active = self.request.query_params.get("is_active", None)
+
+        # If user belongs to org which owns the case, he will see all alerts about the case
+        if case_id is not None:
+            case = get_object_or_404(Case, id=case_id)
+            case_organization_id = case.organization_id
+            if organization_id == case_organization_id:
+                organization_id = None
+
+        # Check for admin
         if organization_id is None:
             organization_id = self.request.query_params.get("organization_id", None)
         return Alert.objects.get_web_queryset(active, case_id, organization_id)
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        volunteers_only = data.pop("volunteersOnly")
+        data["volunteers_only"] = volunteers_only
+        country = request.user.organization.country
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, volunteers_only, country)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer, volunteers_only, country):
         organization = Organization.objects.get(id=self.request.user.organization_id)
         geolocation_point = Point(
             float(self.request.data["latitude"]), float(self.request.data["longitude"])
         )
         serializer.save(geolocation_point=geolocation_point, organization=organization)
-        self.send_notification(serializer.data)
+        if volunteers_only:
+            self.send_notification_to_volunteers(serializer.data, organization.id)
+        else:
+            self.send_notification(serializer.data, country)
 
 
 class AlertCountList(APIView):

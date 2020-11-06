@@ -7,9 +7,16 @@ from users.models import User
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
+    # logo = serializers.SerializerMethodField()
     class Meta:
         model = Organization
         fields = "__all__"
+
+    # def get_logo(self, instance):
+    #     if not instance.logo:
+    #         return None
+    #     request = self.context.get("request")
+    #     return request.build_absolute_uri(instance.logo.url)
 
 
 class OrganizationUsersSerializer(serializers.ModelSerializer):

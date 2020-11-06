@@ -4,7 +4,7 @@ from users.models import Uuid
 
 
 class FCMDevice(models.Model):
-    DEVICE_TYPES = ((u"ios", u"ios"), (u"android", u"android"), (u"web", u"web"))
+    DEVICE_TYPES = ((u"ios_gr", u"ios_gr"), (u"ios_be", u"ios_be"), (u"android", u"android"), (u"web", u"web"))
 
     uuid = models.OneToOneField(
         Uuid, on_delete=models.CASCADE, related_name="device", blank=True, null=True

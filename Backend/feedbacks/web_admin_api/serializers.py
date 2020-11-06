@@ -7,6 +7,9 @@ class FeedbackSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField(read_only=True)
     case = serializers.PrimaryKeyRelatedField(read_only=True)
     user_id = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+    user_phone = serializers.SerializerMethodField()
     checked_by_id = serializers.SerializerMethodField()
     checked_by_name = serializers.SerializerMethodField()
     checked_by_role = serializers.SerializerMethodField()
@@ -27,6 +30,27 @@ class FeedbackSerializer(serializers.ModelSerializer):
     def get_user_id(feedback):
         if feedback.user is not None:
             return feedback.user.id
+        else:
+            return None
+
+    @staticmethod
+    def get_user_name(feedback):
+        if feedback.user is not None:
+            return feedback.user.first_name + " " + feedback.user.last_name
+        else:
+            return None
+
+    @staticmethod
+    def get_user_email(feedback):
+        if feedback.user is not None:
+            return feedback.user.email
+        else:
+            return None
+
+    @staticmethod
+    def get_user_phone(feedback):
+        if feedback.user is not None:
+            return feedback.user.phone
         else:
             return None
 

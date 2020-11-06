@@ -2,6 +2,7 @@ import analytics.analytics_case as ac
 
 from rest_framework import serializers
 
+from alerts.models import Alert
 from cases.models import (
     Case,
     SocialMedia,
@@ -12,9 +13,70 @@ from cases.models import (
     Feed,
     CaseVolunteerLocation,
     SocialNetworksData,
+    AnonymizedCase,
+    SharedCase,
 )
 from facilities.models import Facility
 from feedbacks.models import Feedback
+from organizations.models import Organization
+from places.models import Place
+
+
+class ArchivedCaseSerializer(serializers.ModelSerializer):
+    disappearance_date = serializers.SerializerMethodField(read_only=True)
+    disappearance_location = serializers.SerializerMethodField(read_only=True)
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    date_of_birth = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Case
+        fields = (
+            "id",
+            "organization",
+            "first_name",
+            "last_name",
+            "date_of_birth",
+            "disappearance_date",
+            "disappearance_location",
+            "disappearance_type",
+            "nationality",
+            "amber_alert",
+        )
+
+    @staticmethod
+    def get_first_name(case):
+        return case.child.first_name
+
+    @staticmethod
+    def get_last_name(case):
+        return case.child.last_name
+
+    @staticmethod
+    def get_date_of_birth(case):
+        return case.child.date_of_birth.isoformat()
+
+    @staticmethod
+    def get_disappearance_date(case):
+        feedbacks = Feedback.objects.filter(case=case).order_by("id")
+        if case is not None and feedbacks is not None and len(feedbacks) > 0:
+            return feedbacks[0].date.isoformat()
+        else:
+            return ""
+
+    @staticmethod
+    def get_disappearance_location(case):
+        feedbacks = Feedback.objects.filter(case=case).order_by("date")
+        if case is not None and feedbacks is not None and len(feedbacks) > 0:
+            return feedbacks[0].address
+        else:
+            return ""
+
+
+class AnonymizedCaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnonymizedCase
+        fields = "__all__"
 
 
 class ChildSerializer(serializers.ModelSerializer):
@@ -38,6 +100,8 @@ class SocialMediaSerializer(serializers.ModelSerializer):
 class SimilarCasesSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
+    disappearance_date = serializers.SerializerMethodField(read_only=True)
+    arrival_date = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -51,12 +115,57 @@ class SimilarCasesSerializer(serializers.ModelSerializer):
     def get_last_name(case):
         return case.child.last_name
 
+    @staticmethod
+    def get_disappearance_date(case):
+        feedbacks = Feedback.objects.filter(case=case).order_by("id")
+        if case is not None and feedbacks is not None and len(feedbacks) > 0:
+            return feedbacks[0].date
+        else:
+            return ""
+
+    @staticmethod
+    def get_arrival_date(case):
+        return case.arrival_at_facility_date
+
+
+class LinkedCasesSerializer(serializers.ModelSerializer):
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    disappearance_date = serializers.SerializerMethodField(read_only=True)
+    arrival_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Case
+        fields = "__all__"
+
+    @staticmethod
+    def get_first_name(case):
+        return case.child.first_name
+
+    @staticmethod
+    def get_last_name(case):
+        return case.child.last_name
+
+    @staticmethod
+    def get_disappearance_date(case):
+        feedbacks = Feedback.objects.filter(case=case).order_by("id")
+        if case is not None and feedbacks is not None and len(feedbacks) > 0:
+            return feedbacks[0].date
+        else:
+            return ""
+
+    @staticmethod
+    def get_arrival_date(case):
+        return case.arrival_at_facility_date
+
 
 class CasesSerializer(serializers.ModelSerializer):
 
+    is_shared = serializers.SerializerMethodField(read_only=True)
     disappearance_date = serializers.SerializerMethodField(read_only=True)
     disappearance_location = serializers.SerializerMethodField(read_only=True)
     arrival_date = serializers.SerializerMethodField()
+    organization_name = serializers.SerializerMethodField()
     # profile_photo = serializers.SerializerMethodField()
 
     first_name = serializers.SerializerMethodField()
@@ -80,6 +189,14 @@ class CasesSerializer(serializers.ModelSerializer):
     #         return None
     #     request = self.context.get("request")
     #     return request.build_absolute_uri(instance.profile_photo.url)
+
+    @staticmethod
+    def get_organization_name(case):
+        return case.organization.name
+
+    @staticmethod
+    def get_is_shared(case):
+        return len(SharedCase.objects.filter(case=case)) > 0
 
     def get_current_facility_id(self, case):
         try:
@@ -159,6 +276,19 @@ class CasesSerializer(serializers.ModelSerializer):
         data = ceng.get_profiling_preds_json()
         instance.data = data
         instance.save()
+
+        list_of_event_places = ceng.get_venues_from_socialnetworks_apis(radius=20)
+        for item in list_of_event_places:
+            a = Place(
+                case=instance,
+                description=item["description"],
+                address=item["address"],
+                longitude=item["longitude"],
+                latitude=item["latitude"],
+                source=item["source"],
+                is_event=True,
+            )
+            a.save()
         return instance
 
     # def create(self, validated_data):
@@ -201,6 +331,7 @@ class FileSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
     tag = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = File
@@ -217,6 +348,12 @@ class FileSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_last_name(file):
         return file.user.last_name if file.user else ""
+
+    def get_image(self, instance):
+        if not instance.image:
+            return None
+        request = self.context.get("request")
+        return request.build_absolute_uri(instance.image.url)
 
 
 class CaseVolunteerSerializer(serializers.ModelSerializer):
@@ -256,3 +393,28 @@ class CaseVolunteerSerializer(serializers.ModelSerializer):
     def get_longitude(case_volunteer):
         last_locations = CaseVolunteerLocation.objects.filter(case_volunteer=case_volunteer.id)
         return last_locations.last().longitude if len(last_locations) > 0 else None
+
+
+class SharedCasesSerializer(serializers.ModelSerializer):
+    case_name = serializers.SerializerMethodField()
+    organization_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SharedCase
+        fields = "__all__"
+
+    @staticmethod
+    def get_case_name(shared_case):
+        case = Case.objects.filter(id=shared_case.case.id).first()
+        if case is not None:
+            return case.custom_name
+        else:
+            return None
+
+    @staticmethod
+    def get_organization_name(shared_case):
+        organization = Organization.objects.filter(id=shared_case.organization.id).first()
+        if organization is not None:
+            return organization.name
+        else:
+            return None

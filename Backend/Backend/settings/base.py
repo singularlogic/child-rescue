@@ -41,7 +41,7 @@ BASE_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "django_extensions",
+    # "django_extensions",
     "corsheaders",
     "rest_framework",
     "oauth2_provider",
@@ -128,8 +128,8 @@ AUTHENTICATION_BACKENDS = (
     "social_core.backends.facebook.FacebookAppOAuth2",
     "social_core.backends.facebook.FacebookOAuth2",
     # Google
-    "social_core.backends.google.GoogleOAuth2",
-    "social_core.backends.google.GoogleOAuth",
+    # "social_core.backends.google.GoogleOAuth2",
+    # "social_core.backends.google.GoogleOAuth",
     # django-rest-framework-social-oauth2
     "rest_framework_social_oauth2.backends.DjangoOAuth2",
     # Django
@@ -203,7 +203,7 @@ CSRF_COOKIE_NAME = "csrftoken"
 
 
 # Important Variables
-
+SERVER = os.getenv("SERVER")
 BASE_URL = os.getenv("BASE_URL")
 BASE_AUTH_URL = os.getenv("BASE_AUTH_URL")
 BASE_FE_URL = os.getenv("BASE_FE_URL")

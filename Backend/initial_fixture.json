@@ -1,0 +1,36 @@
+[
+    {
+        "model": "users.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$180000$YTril7pwxHW6$mQzWmL/Ojnplq7fYRQygEa2ADb+Yrywyvsy3wGwVUUI=",
+            "last_login": "2020-05-13T10:57:39.171Z",
+            "is_superuser": true,
+            "first_name": "",
+            "last_name": "",
+            "email": "admin@admin.com",
+            "is_staff": true,
+            "is_active": true,
+            "created_at": "2020-05-05T14:57:46.763Z",
+            "updated_at": "2020-05-05T14:57:46.763Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "oauth2_provider.application",
+        "pk": 1,
+        "fields": {
+            "client_id": "s87FXLyvXRQOuMm3Ge3VdAtH0rTOF8rLqFCbIGJ2",
+            "user": null,
+            "redirect_uris": "",
+            "client_type": "confidential",
+            "authorization_grant_type": "password",
+            "client_secret": "fPHCMW1bDkbuSIemx8tnGe2UDocYa2dmqlFD71Secnc1O4Zr2ptwTR7xoIqj4xr6YpncOuacMlo6rfdac531AuxBSEiBCAfqpIuWhBUr3egCM1PhIP3Eo6Lx7IjRu2fC",
+            "name": "app",
+            "skip_authorization": false,
+            "created": "2020-05-05T14:58:23.544Z",
+            "updated": "2020-05-05T14:58:23.544Z"
+        }
+    }
+]

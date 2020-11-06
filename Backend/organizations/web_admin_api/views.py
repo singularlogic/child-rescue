@@ -18,10 +18,19 @@ from organizations.web_admin_api.permissions import (
 )
 
 
+class OtherOrganizationList(generics.ListCreateAPIView):
+    serializer_class = OrganizationSerializer
+    # permission_classes = (OrganizationPermissions,)
+
+    def get_queryset(self):
+        organization_id = self.request.user.organization_id
+        return Organization.objects.exclude(id=organization_id)
+
+
 class OrganizationList(generics.ListCreateAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    permission_classes = (OrganizationPermissions,)
+    # permission_classes = (OrganizationPermissions,)
 
 
 class OrganizationDetails(generics.RetrieveUpdateDestroyAPIView):
@@ -30,6 +39,7 @@ class OrganizationDetails(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (OrganizationObjectPermissions,)
 
     def update(self, request, *args, **kwargs):
+        print(request.data)
         partial = kwargs.pop("partial", True)
         instance = self.get_object()
 

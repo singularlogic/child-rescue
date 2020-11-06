@@ -13,7 +13,10 @@ class AlertSerializer(serializers.ModelSerializer):
     hair_color = serializers.SerializerMethodField()
     height = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
+    stature = serializers.SerializerMethodField()
+    body_type = serializers.SerializerMethodField()
     date_of_birth = serializers.SerializerMethodField()
+    haircut = serializers.SerializerMethodField()
 
     class Meta:
         model = Alert
@@ -39,6 +42,9 @@ class AlertSerializer(serializers.ModelSerializer):
             "height",
             "weight",
             "image",
+            "stature",
+            "body_type",
+            "haircut",
         )
 
     @staticmethod
@@ -46,6 +52,14 @@ class AlertSerializer(serializers.ModelSerializer):
         # Careful here it is custom_name instead fullname
         if alert.case is not None:
             return alert.case.custom_name
+        else:
+            return ""
+
+    @staticmethod
+    def get_haircut(alert):
+        # Careful here it is custom_name instead fullname
+        if alert.case is not None:
+            return alert.case.haircut
         else:
             return ""
 
@@ -67,7 +81,7 @@ class AlertSerializer(serializers.ModelSerializer):
     def get_image(self, alert):
         request = self.context.get("request")
         photo = alert.case.profile_photo
-        if photo is not None:
+        if photo and photo is not None:
             return request.build_absolute_uri(photo.url)
         return None
 
@@ -75,6 +89,20 @@ class AlertSerializer(serializers.ModelSerializer):
     def get_eye_color(alert):
         if alert.case is not None:
             return alert.case.eye_color
+        else:
+            return ""
+
+    @staticmethod
+    def get_stature(alert):
+        if alert.case is not None:
+            return alert.case.stature
+        else:
+            return ""
+
+    @staticmethod
+    def get_body_type(alert):
+        if alert.case is not None:
+            return alert.case.body_type
         else:
             return ""
 

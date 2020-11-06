@@ -19,7 +19,8 @@ class FacilitySet(models.QuerySet):
     def add_child_to_facility(facility_id, child_id, date_entered):
         from cases.models import Case, FacilityHistory
 
-        case = Case.objects.get(child_id=child_id)
+        # case = Case.objects.get(child_id=child_id)
+        case = Case.objects.filter(child_id=child_id).last()
         case.presence_status = "present"
         case.status = "inactive"
         case.arrival_at_facility_date = date_entered
@@ -50,7 +51,7 @@ class FacilitySet(models.QuerySet):
 
 class Facility(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=250)
     is_active = models.BooleanField(default=True)
     supports_hosting = models.BooleanField(default=False)
     email = models.EmailField(blank=True, null=True)

@@ -1,0 +1,8 @@
+#!/bin/sh
+set -Eeu
+
+#./wait-for-it.sh postgres:5432
+python manage.py migrate
+python /app/manage.py collectstatic --noinput
+#python manage.py loaddata initial_fixture.json
+/usr/local/bin/gunicorn Backend.wsgi --bind 0.0.0.0:8082 --workers=4 --chdir=/app --log-level debug

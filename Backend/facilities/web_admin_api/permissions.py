@@ -90,7 +90,8 @@ class HasAddChildToFacilityPermissions(BaseChildFacilityPermissions):
             return False
 
         capacity = Facility.objects.get(pk=facility_id).capacity
-        case = get_object_or_404(Case, child=child_id)
+        # case = get_object_or_404(Case, child=child_id)
+        case = Case.objects.filter(child=child_id).last()
         if FacilityHistory.objects.filter(facility__id=facility_id, case__id=case.id, date_left__isnull=True).exists():
             self.message = "This child is already registered in this facility!"
             return False

@@ -58,6 +58,7 @@ class CaseUtils(object):
         (None, "Unknown"),
     )
     BODY_CHOICES = (
+        ("petit", "Petit"),
         ("slim", "Slim"),
         ("normal", "Normal"),
         ("overweight", "Overweight"),

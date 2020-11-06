@@ -54,3 +54,21 @@ class FileAdmin(admin.ModelAdmin):
 class FeedAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Feed._meta.fields]
     list_display_links = ("id",)
+
+
+@admin.register(AnonymizedCase)
+class AnonymizedCaseAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in AnonymizedCase._meta.fields]
+    list_display_links = ("id",)
+
+
+@admin.register(SharedCase)
+class SharedCaseAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in SharedCase._meta.fields]
+    list_display_links = ("id",)
+
+
+@admin.register(LinkedCase)
+class LinkedCaseAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in LinkedCase._meta.fields]
+    list_display_links = ("id",)

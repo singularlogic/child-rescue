@@ -23,8 +23,11 @@ class HasPlacePermissions(permissions.BasePermission):
 
         if request.method in ["POST"]:
             case_id = request.data.get("case", None)
-            case = get_object_or_404(Case, id=case_id)
-            return _check_permissions(request.user, case)
+            if case_id is not None:
+                case = get_object_or_404(Case, id=case_id)
+                return _check_permissions(request.user, case)
+            else:
+                return True
         elif request.method in ["DELETE", "PATCH", "PUT"]:
             place = get_object_or_404(Place, id=view.kwargs["pk"])
             return _check_permissions(request.user, place.case)

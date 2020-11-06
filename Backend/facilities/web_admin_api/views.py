@@ -90,16 +90,12 @@ class FacilityAddChild(APIView):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        print("IUGUFUYF")
         facility_id = request.user.facility_id
-        print(facility_id)
         if request.user.role == "admin":
             facility_id = request.query_params.get("facility_id", None)
         child_id = kwargs.pop("child_id", None)
         local_now = datetime.datetime.now(get_localzone())
         date_entered = request.query_params.get("date_entered", local_now)
-        print("child_id")
-        print(child_id)
         Facility.objects.add_child_to_facility(facility_id, child_id, date_entered)
         return Response(
             "Child: {} was added to facility: {}".format(child_id, facility_id),

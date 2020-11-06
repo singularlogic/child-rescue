@@ -6,6 +6,7 @@ from .views import *
 
 urlpatterns = [
     path("", OrganizationList.as_view(), name="organization_list"),
+    path("others/", OtherOrganizationList.as_view(), name="other_organization_list"),
     path("<int:pk>/", OrganizationDetails.as_view(), name="organization_details"),
     path("<int:pk>/users/", OrganizationUsersList.as_view(), name="organization_users"),
     path(
